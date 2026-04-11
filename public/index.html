@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DevCenter — Email Agent</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --surface2: #21262d;
+      --border: #30363d;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --blue: #58a6ff;
+      --green: #3fb950;
+      --yellow: #d29922;
+      --orange: #f0883e;
+      --red: #f85149;
+      --purple: #bc8cff;
+      --teal: #39d353;
+      --radius: 8px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-left { display: flex; align-items: center; gap: 12px; }
+    .logo {
+      width: 28px; height: 28px;
+      background: linear-gradient(135deg, #58a6ff, #bc8cff);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 13px; color: white;
+    }
+    .brand { font-weight: 600; font-size: 15px; }
+    .brand span { color: var(--text-muted); font-weight: 400; }
+
+    .header-right { display: flex; align-items: center; gap: 10px; }
+    .status-badge {
+      display: flex; align-items: center; gap: 6px;
+      padding: 4px 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .status-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+    }
+    .status-dot.running { background: var(--yellow); animation: pulse 1s infinite; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .btn {
+      padding: 7px 14px;
+      border-radius: var(--radius);
+      border: 1px solid transparent;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .btn-primary {
+      background: var(--blue);
+      color: #0d1117;
+      border-color: var(--blue);
+    }
+    .btn-primary:hover { background: #79c0ff; border-color: #79c0ff; }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-muted);
+      border-color: var(--border);
+    }
+    .btn-ghost:hover { background: var(--surface2); color: var(--text); }
+    .btn-sm { padding: 4px 10px; font-size: 12px; }
+
+    /* ── Main Layout ── */
+    .main { padding: 24px; max-width: 1600px; margin: 0 auto; }
+
+    /* ── Last Run Banner ── */
+    .last-run {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .last-run-left { display: flex; align-items: center; gap: 10px; }
+    .last-run-label { color: var(--text-muted); font-size: 12px; }
+    .last-run-summary { font-size: 13px; }
+    .last-run-time { color: var(--text-muted); font-size: 12px; }
+
+    /* ── Stats Grid ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    .stat-card:hover { border-color: #58a6ff55; }
+    .stat-card.active { border-color: var(--blue); }
+    .stat-label {
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .stat-value {
+      font-size: 26px;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .stat-value.blue { color: var(--blue); }
+    .stat-value.green { color: var(--green); }
+    .stat-value.yellow { color: var(--yellow); }
+    .stat-value.orange { color: var(--orange); }
+    .stat-value.purple { color: var(--purple); }
+    .stat-value.red { color: var(--red); }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+    .tab {
+      padding: 8px 16px;
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 14px;
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+      margin-bottom: -1px;
+    }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+
+    /* ── Controls Bar ── */
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .search-input {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 7px 12px;
+      color: var(--text);
+      font-size: 13px;
+      width: 260px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .search-input::placeholder { color: var(--text-muted); }
+    .search-input:focus { border-color: var(--blue); }
+
+    .filter-select {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 7px 12px;
+      color: var(--text);
+      font-size: 13px;
+      outline: none;
+      cursor: pointer;
+    }
+    .filter-select option { background: var(--surface2); }
+
+    .count-label { color: var(--text-muted); font-size: 12px; margin-left: auto; }
+
+    /* ── Table ── */
+    .table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .table-scroll { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      background: var(--surface2);
+      padding: 10px 12px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      user-select: none;
+    }
+    th:hover { color: var(--text); }
+    th .sort-icon { margin-left: 4px; font-size: 10px; }
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #21262d;
+      vertical-align: middle;
+      max-width: 180px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 13px;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #1f2937; }
+
+    /* ── Status Badge ── */
+    .badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .badge::before {
+      content: ''; width: 6px; height: 6px;
+      border-radius: 50%; background: currentColor; opacity: 0.8;
+    }
+    .badge-pending    { background: #21262d; color: #8b949e; }
+    .badge-sent       { background: #0d2236; color: #58a6ff; }
+    .badge-followed1  { background: #2d1b00; color: #d29922; }
+    .badge-followed2  { background: #3d1500; color: #f0883e; }
+    .badge-replied    { background: #0d2d1b; color: #3fb950; }
+    .badge-converted  { background: #1a0d2e; color: #bc8cff; }
+    .badge-ghosted    { background: #2d0d0d; color: #f85149; }
+    .badge-unsub      { background: #21262d; color: #6e7681; }
+
+    /* ── Pagination ── */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      font-size: 13px;
+    }
+    .pagination-info { color: var(--text-muted); font-size: 12px; }
+    .pagination-btns { display: flex; gap: 6px; align-items: center; }
+    .pagination-btns button {
+      padding: 5px 12px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text-muted);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .pagination-btns button:hover:not(:disabled) { color: var(--text); border-color: var(--blue); }
+    .pagination-btns button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .pagination-btns .page-current {
+      color: var(--blue);
+      font-weight: 600;
+      padding: 5px 8px;
+      font-size: 12px;
+    }
+    .per-page-select {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    /* ── Empty State ── */
+    .empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+    .empty-icon { font-size: 40px; margin-bottom: 12px; }
+    .empty-title { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+
+    /* ── Loading ── */
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-muted);
+    }
+    .spinner {
+      display: inline-block;
+      width: 20px; height: 20px;
+      border: 2px solid var(--border);
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed;
+      bottom: 24px; right: 24px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 18px;
+      font-size: 13px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      z-index: 999;
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all 0.3s;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.success { border-color: var(--green); color: var(--green); }
+    .toast.error { border-color: var(--red); color: var(--red); }
+
+    .log-action { color: var(--text); }
+    .log-outcome { color: var(--text-muted); font-size: 12px; max-width: 350px; overflow: hidden; text-overflow: ellipsis; }
+    .refresh-info { color: var(--text-muted); font-size: 11px; }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .header { padding: 0 12px; }
+      .main { padding: 12px; }
+      .search-input { width: 160px; }
+      .stats-grid { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-left">
+    <div class="logo">DC</div>
+    <span class="brand">DevCenter <span>/ Email Agent</span></span>
+  </div>
+  <div class="header-right">
+    <span class="refresh-info" id="refreshInfo">Auto-refresh: 30s</span>
+    <div class="status-badge">
+      <div class="status-dot" id="statusDot"></div>
+      <span id="statusText">Idle</span>
+    </div>
+    <label class="btn btn-ghost" style="cursor:pointer;">
+      Upload CSV
+      <input type="file" id="csvUpload" accept=".csv,.xlsx" style="display:none;" onchange="handleUpload(this)">
+    </label>
+    <button class="btn btn-primary" id="runBtn" onclick="triggerRun()">Run Now</button>
+  </div>
+</header>
+
+<main class="main">
+
+  <!-- Last Run Banner -->
+  <div class="last-run" id="lastRunBanner" style="display:none;">
+    <div class="last-run-left">
+      <span id="lastRunIcon"></span>
+      <div>
+        <div class="last-run-label">Last run</div>
+        <div class="last-run-summary" id="lastRunSummary">--</div>
+      </div>
+    </div>
+    <span class="last-run-time" id="lastRunTime"></span>
+  </div>
+
+  <!-- Stats (clickable to filter) -->
+  <div class="stats-grid" id="statsGrid">
+    <div class="stat-card" onclick="filterByStatus('')" id="card-total"><div class="stat-label">Total</div><div class="stat-value" id="s-total">--</div></div>
+    <div class="stat-card" onclick="filterByStatus('pending')" id="card-pending"><div class="stat-label">Pending</div><div class="stat-value blue" id="s-pending">--</div></div>
+    <div class="stat-card" onclick="filterByStatus('sent')" id="card-sent"><div class="stat-label">Sent</div><div class="stat-value yellow" id="s-sent">--</div></div>
+    <div class="stat-card" onclick="filterByStatus('followed_up')" id="card-followed"><div class="stat-label">Follow-ups</div><div class="stat-value orange" id="s-followed">--</div></div>
+    <div class="stat-card" onclick="filterByStatus('replied')" id="card-replied"><div class="stat-label">Replied</div><div class="stat-value green" id="s-replied">--</div></div>
+    <div class="stat-card" onclick="filterByStatus('converted')" id="card-converted"><div class="stat-label">Converted</div><div class="stat-value purple" id="s-converted">--</div></div>
+    <div class="stat-card" onclick="filterByStatus('do_not_contact')" id="card-ghosted"><div class="stat-label">Ghosted</div><div class="stat-value red" id="s-ghosted">--</div></div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('contacts', this)">Contacts</button>
+    <button class="tab" onclick="switchTab('logs', this)">Activity Log</button>
+  </div>
+
+  <!-- Contacts Tab -->
+  <div id="tab-contacts">
+    <div class="controls">
+      <input class="search-input" id="contactSearch" placeholder="Search name, email, company..." oninput="filterContacts()">
+      <select class="filter-select" id="statusFilter" onchange="filterContacts()">
+        <option value="">All Status</option>
+        <option value="pending">Pending</option>
+        <option value="sent">Sent</option>
+        <option value="followed_up_1">Followed Up #1</option>
+        <option value="followed_up_2">Followed Up #2</option>
+        <option value="replied">Replied</option>
+        <option value="converted">Converted</option>
+        <option value="do_not_contact">Ghosted</option>
+        <option value="unsubscribed">Unsubscribed</option>
+      </select>
+      <select class="filter-select" id="industryFilter" onchange="filterContacts()">
+        <option value="">All Industries</option>
+      </select>
+      <span class="count-label" id="contactCount"></span>
+    </div>
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table id="contactsTable">
+          <thead>
+            <tr>
+              <th onclick="sortContacts('Name')">Name <span class="sort-icon" id="sort-Name"></span></th>
+              <th onclick="sortContacts('Email')">Email <span class="sort-icon" id="sort-Email"></span></th>
+              <th onclick="sortContacts('Company')">Company <span class="sort-icon" id="sort-Company"></span></th>
+              <th>Role</th>
+              <th>Industry</th>
+              <th onclick="sortContacts('Status')">Status <span class="sort-icon" id="sort-Status"></span></th>
+              <th onclick="sortContacts('Last Action Date')">Last Action <span class="sort-icon" id="sort-Last Action Date"></span></th>
+              <th>Follow-ups</th>
+              <th>Replied</th>
+              <th>Next Action</th>
+            </tr>
+          </thead>
+          <tbody id="contactsBody">
+            <tr><td colspan="10" class="loading"><span class="spinner"></span>Loading contacts...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination" id="contactsPagination"></div>
+    </div>
+  </div>
+
+  <!-- Logs Tab -->
+  <div id="tab-logs" style="display:none;">
+    <div class="controls">
+      <input class="search-input" id="logSearch" placeholder="Search logs..." oninput="filterLogs()">
+      <span class="count-label" id="logCount"></span>
+    </div>
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Contact Email</th>
+              <th>Action Taken</th>
+              <th>Outcome Summary</th>
+            </tr>
+          </thead>
+          <tbody id="logsBody">
+            <tr><td colspan="4" class="loading"><span class="spinner"></span>Loading logs...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination" id="logsPagination"></div>
+    </div>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let allContacts = [];
+  let allLogs = [];
+  let filteredContacts = [];
+  let filteredLogs = [];
+  let refreshTimer;
+
+  // Pagination state
+  let contactPage = 1;
+  let logPage = 1;
+  let perPage = 25;
+
+  // Sort state
+  let sortField = '';
+  let sortDir = 'asc';
+
+  // ── Init ──────────────────────────────────────────────────────
+  async function init() {
+    await Promise.all([loadStats(), loadContacts(), loadLogs(), loadStatus()]);
+    scheduleRefresh();
+  }
+
+  function scheduleRefresh() {
+    clearTimeout(refreshTimer);
+    refreshTimer = setTimeout(async () => {
+      await Promise.all([loadStats(), loadContacts(), loadLogs(), loadStatus()]);
+      scheduleRefresh();
+    }, 30000);
+  }
+
+  // ── API Calls ─────────────────────────────────────────────────
+  async function loadStats() {
+    try {
+      const r = await fetch('/api/stats');
+      const { data } = await r.json();
+      if (!data) return;
+      document.getElementById('s-total').textContent    = data.total ?? '--';
+      document.getElementById('s-pending').textContent  = data.pending ?? '--';
+      document.getElementById('s-sent').textContent     = data.sent ?? '--';
+      document.getElementById('s-followed').textContent = data.followed_up ?? '--';
+      document.getElementById('s-replied').textContent  = data.replied ?? '--';
+      document.getElementById('s-converted').textContent = data.converted ?? '--';
+      document.getElementById('s-ghosted').textContent  = data.ghosted ?? '--';
+    } catch {}
+  }
+
+  async function loadContacts() {
+    try {
+      const r = await fetch('/api/contacts');
+      const { data } = await r.json();
+      allContacts = data || [];
+      populateIndustryFilter();
+      filterContacts();
+    } catch {
+      document.getElementById('contactsBody').innerHTML =
+        '<tr><td colspan="10" class="empty"><div class="empty-icon">!</div><div>Failed to load contacts</div></td></tr>';
+    }
+  }
+
+  async function loadLogs() {
+    try {
+      const r = await fetch('/api/logs');
+      const { data } = await r.json();
+      allLogs = data || [];
+      filterLogs();
+    } catch {}
+  }
+
+  async function loadStatus() {
+    try {
+      const r = await fetch('/api/status');
+      const { isRunning, lastRunResult } = await r.json();
+
+      const dot = document.getElementById('statusDot');
+      const text = document.getElementById('statusText');
+      const btn = document.getElementById('runBtn');
+
+      if (isRunning) {
+        dot.className = 'status-dot running';
+        text.textContent = 'Running...';
+        btn.disabled = true;
+        btn.textContent = 'Running...';
+      } else {
+        dot.className = 'status-dot';
+        text.textContent = 'Idle';
+        btn.disabled = false;
+        btn.textContent = 'Run Now';
+      }
+
+      if (lastRunResult) {
+        const banner = document.getElementById('lastRunBanner');
+        banner.style.display = 'flex';
+        document.getElementById('lastRunSummary').textContent =
+          lastRunResult.summary || (lastRunResult.error ? 'Error: ' + lastRunResult.error : 'Completed');
+        document.getElementById('lastRunTime').textContent =
+          formatDate(lastRunResult.timestamp);
+        document.getElementById('lastRunIcon').textContent =
+          lastRunResult.success === false ? '!' : 'OK';
+      }
+    } catch {}
+  }
+
+  // ── Run Agent ─────────────────────────────────────────────────
+  async function triggerRun() {
+    const btn = document.getElementById('runBtn');
+    btn.disabled = true;
+    btn.textContent = 'Starting...';
+
+    try {
+      const r = await fetch('/api/run', { method: 'POST' });
+      const { success, error } = await r.json();
+      if (success) {
+        showToast('Agent started', 'success');
+        const poll = setInterval(async () => {
+          await loadStatus();
+          if (!document.getElementById('runBtn').disabled) {
+            clearInterval(poll);
+            await Promise.all([loadStats(), loadContacts(), loadLogs()]);
+          }
+        }, 3000);
+      } else {
+        showToast(error || 'Failed to start agent', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Run Now';
+      }
+    } catch {
+      showToast('Network error', 'error');
+      btn.disabled = false;
+      btn.textContent = 'Run Now';
+    }
+  }
+
+  // ── Tabs ──────────────────────────────────────────────────────
+  function switchTab(name, el) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('tab-contacts').style.display = name === 'contacts' ? '' : 'none';
+    document.getElementById('tab-logs').style.display = name === 'logs' ? '' : 'none';
+  }
+
+  // ── Filter by clicking stat cards ─────────────────────────────
+  function filterByStatus(status) {
+    const sel = document.getElementById('statusFilter');
+
+    // Handle "followed_up" which covers both followed_up_1 and followed_up_2
+    if (status === 'followed_up') {
+      sel.value = 'followed_up_1';
+    } else {
+      sel.value = status;
+    }
+
+    // Highlight active card
+    document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('active'));
+    if (status) {
+      const cardMap = {
+        'pending': 'card-pending', 'sent': 'card-sent', 'followed_up': 'card-followed',
+        'followed_up_1': 'card-followed', 'followed_up_2': 'card-followed',
+        'replied': 'card-replied', 'converted': 'card-converted', 'do_not_contact': 'card-ghosted'
+      };
+      const card = document.getElementById(cardMap[status]);
+      if (card) card.classList.add('active');
+    }
+
+    contactPage = 1;
+    filterContacts();
+  }
+
+  // ── Industry filter ───────────────────────────────────────────
+  function populateIndustryFilter() {
+    const sel = document.getElementById('industryFilter');
+    const current = sel.value;
+    const industries = [...new Set(allContacts.map(c => c.Industry).filter(Boolean))].sort();
+    sel.innerHTML = '<option value="">All Industries</option>' +
+      industries.map(i => '<option value="' + esc(i) + '">' + esc(i) + '</option>').join('');
+    sel.value = current;
+  }
+
+  // ── Sort ──────────────────────────────────────────────────────
+  function sortContacts(field) {
+    if (sortField === field) {
+      sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+    } else {
+      sortField = field;
+      sortDir = 'asc';
+    }
+    // Update sort icons
+    document.querySelectorAll('.sort-icon').forEach(el => el.textContent = '');
+    const icon = document.getElementById('sort-' + field);
+    if (icon) icon.textContent = sortDir === 'asc' ? ' ^' : ' v';
+
+    contactPage = 1;
+    filterContacts();
+  }
+
+  // ── Contact Table ─────────────────────────────────────────────
+  function filterContacts() {
+    const search = (document.getElementById('contactSearch').value || '').toLowerCase();
+    const status = (document.getElementById('statusFilter').value || '').toLowerCase();
+    const industry = (document.getElementById('industryFilter').value || '');
+
+    filteredContacts = allContacts.filter(c => {
+      const matchSearch = !search ||
+        (c.Name || '').toLowerCase().includes(search) ||
+        (c.Email || '').toLowerCase().includes(search) ||
+        (c.Company || '').toLowerCase().includes(search) ||
+        (c.Industry || '').toLowerCase().includes(search);
+
+      let matchStatus;
+      if (!status) {
+        matchStatus = true;
+      } else if (status === 'followed_up_1') {
+        // When clicking follow-ups card, show both
+        const s = (c.Status || 'pending').toLowerCase();
+        matchStatus = s === 'followed_up_1' || s === 'followed_up_2';
+      } else {
+        matchStatus = (c.Status || 'pending').toLowerCase() === status;
+      }
+
+      const matchIndustry = !industry || (c.Industry || '') === industry;
+      return matchSearch && matchStatus && matchIndustry;
+    });
+
+    // Sort
+    if (sortField) {
+      filteredContacts.sort((a, b) => {
+        const va = (a[sortField] || '').toString().toLowerCase();
+        const vb = (b[sortField] || '').toString().toLowerCase();
+        if (va < vb) return sortDir === 'asc' ? -1 : 1;
+        if (va > vb) return sortDir === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+
+    document.getElementById('contactCount').textContent = filteredContacts.length + ' contact' + (filteredContacts.length !== 1 ? 's' : '');
+    renderContactsPage();
+  }
+
+  function renderContactsPage() {
+    const start = (contactPage - 1) * perPage;
+    const pageData = filteredContacts.slice(start, start + perPage);
+    renderContacts(pageData);
+    renderPagination('contactsPagination', filteredContacts.length, contactPage, p => { contactPage = p; renderContactsPage(); });
+  }
+
+  function renderContacts(contacts) {
+    const tbody = document.getElementById('contactsBody');
+
+    if (!contacts.length) {
+      tbody.innerHTML = '<tr><td colspan="10"><div class="empty">' +
+        '<div class="empty-title">No contacts found</div>' +
+        '<div>Try a different filter or upload leads</div></div></td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = contacts.map(c => {
+      const lastAction = c['Last Action'] ? esc(c['Last Action']) : '--';
+      const lastDate = c['Last Action Date'] ? esc(c['Last Action Date']) : '';
+      const lastCol = lastDate ? lastAction + '<br><span style="color:var(--text-muted);font-size:11px;">' + lastDate + '</span>' : lastAction;
+
+      return '<tr>' +
+        '<td title="' + esc(c.Name) + '"><strong>' + (esc(c.Name) || '--') + '</strong></td>' +
+        '<td title="' + esc(c.Email) + '" style="color:var(--blue);font-family:monospace;font-size:12px;">' + (esc(c.Email) || '--') + '</td>' +
+        '<td title="' + esc(c.Company) + '">' + (esc(c.Company) || '--') + '</td>' +
+        '<td style="color:var(--text-muted);">' + (esc(c['Role/Title']) || '--') + '</td>' +
+        '<td style="color:var(--text-muted);">' + (esc(c.Industry) || '--') + '</td>' +
+        '<td>' + statusBadge(c.Status) + '</td>' +
+        '<td style="font-size:12px;white-space:normal;max-width:160px;">' + lastCol + '</td>' +
+        '<td style="text-align:center;color:var(--orange);">' + (c['Follow Up Count'] || 0) + '</td>' +
+        '<td>' + (c.Replied === 'YES' ? '<span style="color:var(--green)">YES</span>' : '<span style="color:var(--text-muted)">NO</span>') + '</td>' +
+        '<td title="' + esc(c['Next Scheduled Action']) + '" style="font-size:12px;color:var(--text-muted);">' + (esc((c['Next Scheduled Action'] || '').slice(0, 30)) || '--') + '</td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  // ── Log Table ─────────────────────────────────────────────────
+  function filterLogs() {
+    const search = (document.getElementById('logSearch').value || '').toLowerCase();
+    filteredLogs = allLogs.filter(l =>
+      !search ||
+      (l['Contact Email'] || '').toLowerCase().includes(search) ||
+      (l['Action Taken'] || '').toLowerCase().includes(search) ||
+      (l['Outcome Summary'] || '').toLowerCase().includes(search)
+    );
+    document.getElementById('logCount').textContent = filteredLogs.length + ' entr' + (filteredLogs.length !== 1 ? 'ies' : 'y');
+    logPage = 1;
+    renderLogsPage();
+  }
+
+  function renderLogsPage() {
+    const start = (logPage - 1) * perPage;
+    const pageData = filteredLogs.slice(start, start + perPage);
+    renderLogs(pageData);
+    renderPagination('logsPagination', filteredLogs.length, logPage, p => { logPage = p; renderLogsPage(); });
+  }
+
+  function renderLogs(logs) {
+    const tbody = document.getElementById('logsBody');
+    if (!logs.length) {
+      tbody.innerHTML = '<tr><td colspan="4"><div class="empty">' +
+        '<div class="empty-title">No activity yet</div>' +
+        '<div>Run the agent to see activity here</div></div></td></tr>';
+      return;
+    }
+    tbody.innerHTML = logs.map(l =>
+      '<tr>' +
+        '<td style="white-space:nowrap;color:var(--text-muted);font-size:12px;">' + (esc(l.Date) || '--') + '</td>' +
+        '<td style="color:var(--blue);font-family:monospace;font-size:12px;">' + (esc(l['Contact Email']) || '--') + '</td>' +
+        '<td class="log-action">' + (esc(l['Action Taken']) || '--') + '</td>' +
+        '<td class="log-outcome" title="' + esc(l['Outcome Summary']) + '">' + (esc(l['Outcome Summary']) || '--') + '</td>' +
+      '</tr>'
+    ).join('');
+  }
+
+  // ── Pagination ────────────────────────────────────────────────
+  function renderPagination(containerId, totalItems, currentPage, onPageChange) {
+    const container = document.getElementById(containerId);
+    const totalPages = Math.ceil(totalItems / perPage) || 1;
+
+    if (totalItems <= perPage) {
+      container.innerHTML = '<div class="pagination-info">Showing all ' + totalItems + ' items</div><div></div>';
+      return;
+    }
+
+    const start = (currentPage - 1) * perPage + 1;
+    const end = Math.min(currentPage * perPage, totalItems);
+
+    container.innerHTML =
+      '<div class="pagination-info">Showing ' + start + '-' + end + ' of ' + totalItems + '</div>' +
+      '<div class="pagination-btns">' +
+        '<select class="per-page-select" onchange="changePerPage(this.value)">' +
+          [25, 50, 100].map(n => '<option value="' + n + '"' + (perPage === n ? ' selected' : '') + '>' + n + '/page</option>').join('') +
+        '</select>' +
+        '<button onclick="paginateContacts(' + (currentPage - 1) + ')"' + (currentPage <= 1 ? ' disabled' : '') + '>Prev</button>' +
+        '<span class="page-current">' + currentPage + ' / ' + totalPages + '</span>' +
+        '<button onclick="paginateContacts(' + (currentPage + 1) + ')"' + (currentPage >= totalPages ? ' disabled' : '') + '>Next</button>' +
+      '</div>';
+
+    // Store callback for pagination buttons
+    container._onPageChange = onPageChange;
+  }
+
+  function paginateContacts(page) {
+    contactPage = page;
+    renderContactsPage();
+  }
+
+  function changePerPage(val) {
+    perPage = parseInt(val);
+    contactPage = 1;
+    logPage = 1;
+    renderContactsPage();
+    renderLogsPage();
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────
+  function statusBadge(status) {
+    const s = (status || 'pending').toLowerCase();
+    const map = {
+      pending: ['badge-pending', 'Pending'],
+      sent: ['badge-sent', 'Sent'],
+      followed_up_1: ['badge-followed1', 'Follow-up #1'],
+      followed_up_2: ['badge-followed2', 'Follow-up #2'],
+      replied: ['badge-replied', 'Replied'],
+      converted: ['badge-converted', 'Converted'],
+      do_not_contact: ['badge-ghosted', 'Ghosted'],
+      unsubscribed: ['badge-unsub', 'Unsubscribed']
+    };
+    const [cls, label] = map[s] || ['badge-pending', status || 'Unknown'];
+    return '<span class="badge ' + cls + '">' + label + '</span>';
+  }
+
+  function esc(str) {
+    if (!str && str !== 0) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function formatDate(iso) {
+    if (!iso) return '';
+    try { return new Date(iso).toLocaleString(); }
+    catch { return iso; }
+  }
+
+  function showToast(msg, type) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast ' + (type || 'success') + ' show';
+    setTimeout(function() { t.className = 'toast'; }, 4000);
+  }
+
+  // ── CSV Upload ────────────────────────────────────────────────
+  async function handleUpload(input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      let contacts = [];
+
+      if (file.name.endsWith('.csv')) {
+        const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+        if (lines.length < 2) return showToast('CSV is empty', 'error');
+        const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+        for (let i = 1; i < lines.length; i++) {
+          const vals = lines[i].split(',').map(v => v.trim().replace(/^"|"$/g, ''));
+          const row = {};
+          headers.forEach((h, j) => row[h] = vals[j] || '');
+          if (row.Email) contacts.push(row);
+        }
+      } else {
+        showToast('Please use CSV format (Name,Email,Company,Role/Title,Industry,Notes)', 'error');
+        input.value = '';
+        return;
+      }
+
+      if (!contacts.length) {
+        showToast('No valid contacts found', 'error');
+        input.value = '';
+        return;
+      }
+
+      const r = await fetch('/api/upload-contacts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contacts })
+      });
+      const result = await r.json();
+
+      if (result.success) {
+        showToast('Added ' + result.added + ' new contacts (' + result.total + ' total)', 'success');
+        await Promise.all([loadStats(), loadContacts()]);
+      } else {
+        showToast(result.error || 'Upload failed', 'error');
+      }
+    } catch (err) {
+      showToast('Error: ' + err.message, 'error');
+    }
+    input.value = '';
+  }
+
+  init();
+</script>
+</body>
+</html>

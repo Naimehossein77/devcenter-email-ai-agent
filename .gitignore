@@ -1,0 +1,6 @@
+node_modules/
+.env
+data/contacts.xlsx
+data/email_state.json
+*.log
+.DS_Store
