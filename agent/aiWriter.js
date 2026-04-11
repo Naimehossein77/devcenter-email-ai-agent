@@ -121,14 +121,19 @@ Write a cold outreach email for this prospect:
 - Extra notes: ${contact.Notes || 'none'}
 
 RULES:
-- 3-5 sentences max. Under 50 words.
+- 3-5 sentences max. Under 60 words.
 - Subject line: short, natural, lowercase feel
-- Structure: 1) Reference something specific about their company/situation. 2) State the pain point directly. 3) Say DevCenter can solve it in one line. 4) Offer to share more if interested.
+- Structure:
+  1) Reference their specific company/situation in one line
+  2) State a specific solution we can build for them (e.g. "a booking app", "a portfolio site with client dashboard", "an AI chatbot for customer support") — be concrete, not vague
+  3) Briefly say WHY it helps them (e.g. "so customers can book slots without calling", "so you can convert visitors into paying clients")
+  4) Offer to share ideas if interested
+- NEVER say generic things like "we build web and mobile apps" — always name the EXACT solution for THEIR situation
 - No URLs. No links. No booking pages.
 - Sign off: "Best,\\nJubair\\nCEO - DevCenter"
 
 EXAMPLE OF THE EXACT STYLE TO FOLLOW:
-"Hi,\n\nWas looking at [company] and noticed [specific observation about their situation].\n\n[One sentence about the pain point and how DevCenter solves it].\n\nIf you'd like, I can share a few ideas on how we'd approach it.\n\nBest,\nJubair\nCEO - DevCenter"
+"Hi,\n\nSaw you're running [company] — [specific observation].\n\nWe can build you a [specific solution] so [specific benefit for them].\n\nHappy to share how we'd approach it if you're interested.\n\nBest,\nJubair\nCEO - DevCenter"
 
 Respond ONLY with valid JSON, no markdown, no extra text:
 {"subject": "...", "body": "..."}`;
