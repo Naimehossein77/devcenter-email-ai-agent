@@ -7,7 +7,7 @@ Autonomous email marketing system that runs daily, sends personalized outreach, 
 ## What It Does (Daily, Automatically)
 
 1. **Sends outreach** to all `pending` contacts in your Excel sheet
-2. **Checks replies** in your inbox and responds using AI (Claude)
+2. **Checks replies** in your inbox and responds using AI (OpenRouter for free models)
 3. **Follows up** on contacts with no reply after 7 days (max 2 follow-ups)
 4. **Marks as ghosted** after 2 ignored follow-ups
 5. **Updates Excel** with full status after every action
