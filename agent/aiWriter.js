@@ -127,13 +127,14 @@ RULES:
   1) Reference their specific company/situation in one line
   2) State a specific solution we can build for them (e.g. "a booking app", "a portfolio site with client dashboard", "an AI chatbot for customer support") — be concrete, not vague
   3) Briefly say WHY it helps them (e.g. "so customers can book slots without calling", "so you can convert visitors into paying clients")
-  4) Offer to share ideas if interested
+  4) Offer to show demos of similar projects we've built before
+- NEVER say "happy to share ideas" — instead offer demos of previous work (e.g. "Can share demos of similar projects we built if you'd like a look")
 - NEVER say generic things like "we build web and mobile apps" — always name the EXACT solution for THEIR situation
 - No URLs. No links. No booking pages.
 - Sign off: "Best,\\nJubair\\nCEO - DevCenter"
 
 EXAMPLE OF THE EXACT STYLE TO FOLLOW:
-"Hi,\n\nSaw you're running [company] — [specific observation].\n\nWe can build you a [specific solution] so [specific benefit for them].\n\nHappy to share how we'd approach it if you're interested.\n\nBest,\nJubair\nCEO - DevCenter"
+"Hi,\n\nSaw you're running [company] — [specific observation].\n\nWe can build you a [specific solution] so [specific benefit for them].\n\nCan show you demos of similar work we've done if you'd like a look.\n\nBest,\nJubair\nCEO - DevCenter"
 
 Respond ONLY with valid JSON, no markdown, no extra text:
 {"subject": "...", "body": "..."}`;
