@@ -14,13 +14,18 @@ async function verifyConnection() {
 async function sendEmail({ to, subject, body, replyTo }) {
   const fromAddress = process.env.SMTP_FROM || process.env.SMTP_USER;
   const fromName = process.env.SMTP_FROM_NAME || 'Jubair from DevCenter';
+  const unsubAddr = process.env.UNSUBSCRIBE_EMAIL || fromAddress;
 
   const { data, error } = await resend.emails.send({
     from: `${fromName} <${fromAddress}>`,
     to: [to],
     subject,
     text: body,
-    replyTo: replyTo || fromAddress
+    replyTo: replyTo || fromAddress,
+    headers: {
+      'List-Unsubscribe': `<mailto:${unsubAddr}?subject=unsubscribe>`,
+      'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click'
+    }
   });
 
   if (error) {
@@ -28,7 +33,18 @@ async function sendEmail({ to, subject, body, replyTo }) {
   }
 
   console.log(`[Mailer] ✓ Sent to ${to} — ID: ${data.id}`);
-  return data;
+  return data; // { id: '...' }
 }
 
-module.exports = { sendEmail, verifyConnection };
+// Poll Resend for delivery status
+async function getMessageStatus(messageId) {
+  try {
+    const { data, error } = await resend.emails.get(messageId);
+    if (error) return null;
+    return data; // { id, last_event: 'delivered'|'bounced'|'complained'|... }
+  } catch (e) {
+    return null;
+  }
+}
+
+module.exports = { sendEmail, verifyConnection, getMessageStatus };

@@ -99,13 +99,42 @@ function parseJsonResponse(text) {
     const subjectMatch = text.match(/"subject"\s*:\s*"([^"]+)"/);
     const bodyMatch = text.match(/"body"\s*:\s*"([\s\S]+?)"\s*[},]/);
     result = {
-      subject: subjectMatch?.[1] || 'Quick Question',
-      body: bodyMatch?.[1]?.replace(/\\n/g, '\n') || text
+      subject: subjectMatch?.[1] || '',
+      body: bodyMatch?.[1]?.replace(/\\n/g, '\n') || ''
     };
   }
-  // Ensure subject line uses title case
   if (result.subject) result.subject = titleCase(result.subject);
   return result;
+}
+
+function validateEmailContent(result, kind = 'outreach') {
+  if (!result || typeof result !== 'object') {
+    throw new Error(`AI returned non-object for ${kind}`);
+  }
+  if (!result.subject || result.subject.trim().length < 3) {
+    throw new Error(`AI returned empty/short subject for ${kind}: "${result.subject}"`);
+  }
+  if (!result.body || result.body.trim().length < 20) {
+    throw new Error(`AI returned empty/short body for ${kind}: "${(result.body || '').slice(0, 50)}"`);
+  }
+  return result;
+}
+
+async function writeWithRetry(prompt, maxTokens, kind) {
+  const maxAttempts = 3;
+  let lastErr;
+  for (let i = 0; i < maxAttempts; i++) {
+    try {
+      const text = await callAI(prompt, maxTokens);
+      const result = parseJsonResponse(text);
+      return validateEmailContent(result, kind);
+    } catch (err) {
+      lastErr = err;
+      console.log(`[AI] ${kind} attempt ${i + 1}/${maxAttempts} failed: ${err.message}`);
+      if (i < maxAttempts - 1) await new Promise(r => setTimeout(r, 3000));
+    }
+  }
+  throw lastErr;
 }
 
 // ─── Email Writers ────────────────────────────────────────────────
@@ -139,8 +168,7 @@ EXAMPLE OF THE EXACT STYLE TO FOLLOW:
 Respond ONLY with valid JSON, no markdown, no extra text:
 {"subject": "...", "body": "..."}`;
 
-  const text = await callAI(prompt, 500);
-  return parseJsonResponse(text);
+  return await writeWithRetry(prompt, 500, 'outreach');
 }
 
 async function writeFollowUpEmail(contact, attempt, state) {
@@ -169,8 +197,7 @@ RULES:
 Respond ONLY with valid JSON, no markdown, no extra text:
 {"subject": "...", "body": "..."}`;
 
-  const text = await callAI(prompt, 400);
-  return parseJsonResponse(text);
+  return await writeWithRetry(prompt, 400, 'follow-up');
 }
 
 async function writeReply(contact, incomingEmailText, state) {
@@ -203,7 +230,21 @@ RULES:
 - Sign off: "Best,\\nJubair\\nCEO - DevCenter"
 - Do NOT include a subject line — write only the email body`;
 
-  return await callAI(prompt, 700);
+  const maxAttempts = 3;
+  let lastErr;
+  for (let i = 0; i < maxAttempts; i++) {
+    try {
+      const text = await callAI(prompt, 700);
+      const body = (text || '').trim();
+      if (body.length < 20) throw new Error(`Reply body too short: "${body.slice(0, 50)}"`);
+      return body;
+    } catch (err) {
+      lastErr = err;
+      console.log(`[AI] reply attempt ${i + 1}/${maxAttempts} failed: ${err.message}`);
+      if (i < maxAttempts - 1) await new Promise(r => setTimeout(r, 3000));
+    }
+  }
+  throw lastErr;
 }
 
 module.exports = { writeOutreachEmail, writeFollowUpEmail, writeReply };

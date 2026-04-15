@@ -20,7 +20,6 @@
       --orange: #f0883e;
       --red: #f85149;
       --purple: #bc8cff;
-      --teal: #39d353;
       --radius: 8px;
     }
 
@@ -33,7 +32,6 @@
       min-height: 100vh;
     }
 
-    /* ── Header ── */
     .header {
       background: var(--surface);
       border-bottom: 1px solid var(--border);
@@ -57,7 +55,7 @@
     .brand { font-weight: 600; font-size: 15px; }
     .brand span { color: var(--text-muted); font-weight: 400; }
 
-    .header-right { display: flex; align-items: center; gap: 10px; }
+    .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
     .status-badge {
       display: flex; align-items: center; gap: 6px;
       padding: 4px 10px;
@@ -73,11 +71,7 @@
       background: var(--green);
     }
     .status-dot.running { background: var(--yellow); animation: pulse 1s infinite; }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
-    }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
 
     .btn {
       padding: 7px 14px;
@@ -88,43 +82,50 @@
       font-weight: 500;
       transition: all 0.15s;
     }
-    .btn-primary {
-      background: var(--blue);
-      color: #0d1117;
-      border-color: var(--blue);
-    }
-    .btn-primary:hover { background: #79c0ff; border-color: #79c0ff; }
+    .btn-primary { background: var(--blue); color: #0d1117; border-color: var(--blue); }
+    .btn-primary:hover { background: #79c0ff; }
     .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-    .btn-ghost {
-      background: transparent;
-      color: var(--text-muted);
-      border-color: var(--border);
-    }
+    .btn-ghost { background: transparent; color: var(--text-muted); border-color: var(--border); }
     .btn-ghost:hover { background: var(--surface2); color: var(--text); }
+    .btn-danger { background: transparent; color: var(--red); border-color: var(--red); }
+    .btn-danger:hover { background: rgba(248,81,73,0.1); }
     .btn-sm { padding: 4px 10px; font-size: 12px; }
 
-    /* ── Main Layout ── */
     .main { padding: 24px; max-width: 1600px; margin: 0 auto; }
 
-    /* ── Last Run Banner ── */
-    .last-run {
+    /* Metrics chart */
+    .metrics-section {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .chart-card, .runs-card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 12px 16px;
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 8px;
+      padding: 16px;
     }
-    .last-run-left { display: flex; align-items: center; gap: 10px; }
-    .last-run-label { color: var(--text-muted); font-size: 12px; }
-    .last-run-summary { font-size: 13px; }
-    .last-run-time { color: var(--text-muted); font-size: 12px; }
+    .chart-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+    .chart-svg { width: 100%; height: 140px; }
+    .runs-list { max-height: 170px; overflow-y: auto; }
+    .run-item {
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+    }
+    .run-item:last-child { border-bottom: none; }
+    .run-time { color: var(--text-muted); font-size: 11px; }
+    .run-summary { color: var(--text); margin-top: 2px; }
+    .run-item.error .run-summary { color: var(--red); }
 
-    /* ── Stats Grid ── */
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
@@ -149,11 +150,7 @@
       color: var(--text-muted);
       margin-bottom: 6px;
     }
-    .stat-value {
-      font-size: 26px;
-      font-weight: 700;
-      line-height: 1;
-    }
+    .stat-value { font-size: 26px; font-weight: 700; line-height: 1; }
     .stat-value.blue { color: var(--blue); }
     .stat-value.green { color: var(--green); }
     .stat-value.yellow { color: var(--yellow); }
@@ -161,114 +158,73 @@
     .stat-value.purple { color: var(--purple); }
     .stat-value.red { color: var(--red); }
 
-    /* ── Tabs ── */
-    .tabs {
-      display: flex;
-      gap: 4px;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 16px;
-    }
+    .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
     .tab {
-      padding: 8px 16px;
-      border: none;
-      background: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      font-size: 14px;
-      border-bottom: 2px solid transparent;
-      transition: all 0.15s;
-      margin-bottom: -1px;
+      padding: 8px 16px; border: none; background: none;
+      color: var(--text-muted); cursor: pointer; font-size: 14px;
+      border-bottom: 2px solid transparent; transition: all 0.15s; margin-bottom: -1px;
     }
     .tab:hover { color: var(--text); }
     .tab.active { color: var(--blue); border-bottom-color: var(--blue); }
 
-    /* ── Controls Bar ── */
-    .controls {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 14px;
-      flex-wrap: wrap;
-    }
+    .controls { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
     .search-input {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 7px 12px;
-      color: var(--text);
-      font-size: 13px;
-      width: 260px;
-      outline: none;
-      transition: border-color 0.15s;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 7px 12px;
+      color: var(--text); font-size: 13px; width: 260px; outline: none;
     }
     .search-input::placeholder { color: var(--text-muted); }
     .search-input:focus { border-color: var(--blue); }
 
     .filter-select {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 7px 12px;
-      color: var(--text);
-      font-size: 13px;
-      outline: none;
-      cursor: pointer;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 7px 12px;
+      color: var(--text); font-size: 13px; outline: none; cursor: pointer;
     }
-    .filter-select option { background: var(--surface2); }
-
     .count-label { color: var(--text-muted); font-size: 12px; margin-left: auto; }
 
-    /* ── Table ── */
-    .table-wrap {
-      background: var(--surface);
-      border: 1px solid var(--border);
+    /* Bulk action bar */
+    .bulk-bar {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: #0d2236;
+      border: 1px solid var(--blue);
       border-radius: var(--radius);
-      overflow: hidden;
+      margin-bottom: 10px;
     }
+    .bulk-bar.show { display: flex; }
+    .bulk-count { color: var(--blue); font-weight: 600; font-size: 13px; }
+
+    .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
     .table-scroll { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; }
     th {
-      background: var(--surface2);
-      padding: 10px 12px;
-      text-align: left;
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--text-muted);
-      white-space: nowrap;
-      border-bottom: 1px solid var(--border);
-      cursor: pointer;
-      user-select: none;
+      background: var(--surface2); padding: 10px 12px; text-align: left;
+      font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+      color: var(--text-muted); white-space: nowrap; border-bottom: 1px solid var(--border);
+      cursor: pointer; user-select: none;
     }
     th:hover { color: var(--text); }
+    th.no-sort { cursor: default; }
+    th.no-sort:hover { color: var(--text-muted); }
     th .sort-icon { margin-left: 4px; font-size: 10px; }
     td {
-      padding: 10px 12px;
-      border-bottom: 1px solid #21262d;
-      vertical-align: middle;
-      max-width: 180px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      font-size: 13px;
+      padding: 10px 12px; border-bottom: 1px solid #21262d; vertical-align: middle;
+      max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px;
     }
     tr:last-child td { border-bottom: none; }
     tr:hover td { background: #1f2937; }
+    td.checkbox-col, th.checkbox-col { width: 32px; max-width: 32px; text-align: center; }
+    input[type=checkbox] { cursor: pointer; }
+    .row-actions { display: flex; gap: 4px; }
 
-    /* ── Status Badge ── */
     .badge {
       display: inline-flex; align-items: center; gap: 5px;
-      padding: 3px 9px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 600;
-      white-space: nowrap;
+      padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap;
     }
-    .badge::before {
-      content: ''; width: 6px; height: 6px;
-      border-radius: 50%; background: currentColor; opacity: 0.8;
-    }
+    .badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: 0.8; }
     .badge-pending    { background: #21262d; color: #8b949e; }
     .badge-sent       { background: #0d2236; color: #58a6ff; }
     .badge-followed1  { background: #2d1b00; color: #d29922; }
@@ -278,101 +234,114 @@
     .badge-ghosted    { background: #2d0d0d; color: #f85149; }
     .badge-unsub      { background: #21262d; color: #6e7681; }
 
-    /* ── Pagination ── */
     .pagination {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 16px;
-      border-top: 1px solid var(--border);
-      background: var(--surface);
-      font-size: 13px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px; border-top: 1px solid var(--border); background: var(--surface); font-size: 13px;
     }
     .pagination-info { color: var(--text-muted); font-size: 12px; }
     .pagination-btns { display: flex; gap: 6px; align-items: center; }
     .pagination-btns button {
-      padding: 5px 12px;
-      border: 1px solid var(--border);
-      background: var(--surface2);
-      color: var(--text-muted);
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 12px;
+      padding: 5px 12px; border: 1px solid var(--border); background: var(--surface2);
+      color: var(--text-muted); border-radius: 6px; cursor: pointer; font-size: 12px;
     }
     .pagination-btns button:hover:not(:disabled) { color: var(--text); border-color: var(--blue); }
     .pagination-btns button:disabled { opacity: 0.4; cursor: not-allowed; }
-    .pagination-btns .page-current {
-      color: var(--blue);
-      font-weight: 600;
-      padding: 5px 8px;
-      font-size: 12px;
-    }
+    .pagination-btns .page-current { color: var(--blue); font-weight: 600; padding: 5px 8px; font-size: 12px; }
     .per-page-select {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      border-radius: 6px;
-      padding: 4px 8px;
-      font-size: 12px;
-      cursor: pointer;
+      background: var(--surface2); border: 1px solid var(--border); color: var(--text-muted);
+      border-radius: 6px; padding: 4px 8px; font-size: 12px; cursor: pointer;
     }
 
-    /* ── Empty State ── */
-    .empty {
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--text-muted);
-    }
-    .empty-icon { font-size: 40px; margin-bottom: 12px; }
+    .empty { text-align: center; padding: 60px 20px; color: var(--text-muted); }
     .empty-title { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
 
-    /* ── Loading ── */
-    .loading {
-      text-align: center;
-      padding: 40px;
-      color: var(--text-muted);
-    }
+    .loading { text-align: center; padding: 40px; color: var(--text-muted); }
     .spinner {
-      display: inline-block;
-      width: 20px; height: 20px;
-      border: 2px solid var(--border);
-      border-top-color: var(--blue);
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      margin-right: 8px;
-      vertical-align: middle;
+      display: inline-block; width: 20px; height: 20px;
+      border: 2px solid var(--border); border-top-color: var(--blue);
+      border-radius: 50%; animation: spin 0.7s linear infinite; margin-right: 8px; vertical-align: middle;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── Toast ── */
     .toast {
-      position: fixed;
-      bottom: 24px; right: 24px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 12px 18px;
-      font-size: 13px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-      z-index: 999;
-      transform: translateY(80px);
-      opacity: 0;
-      transition: all 0.3s;
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 12px 18px; font-size: 13px; box-shadow: 0 8px 24px rgba(0,0,0,0.4); z-index: 999;
+      transform: translateY(80px); opacity: 0; transition: all 0.3s;
     }
     .toast.show { transform: translateY(0); opacity: 1; }
     .toast.success { border-color: var(--green); color: var(--green); }
     .toast.error { border-color: var(--red); color: var(--red); }
 
-    .log-action { color: var(--text); }
-    .log-outcome { color: var(--text-muted); font-size: 12px; max-width: 350px; overflow: hidden; text-overflow: ellipsis; }
+    /* Modal */
+    .modal-backdrop {
+      display: none;
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7); z-index: 500;
+      align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .modal-backdrop.show { display: flex; }
+    .modal {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); max-width: 700px; width: 100%;
+      max-height: 90vh; overflow-y: auto;
+    }
+    .modal-header {
+      padding: 16px 20px; border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .modal-title { font-size: 16px; font-weight: 600; }
+    .modal-close {
+      background: none; border: none; color: var(--text-muted);
+      font-size: 24px; cursor: pointer; line-height: 1;
+    }
+    .modal-close:hover { color: var(--text); }
+    .modal-body { padding: 20px; }
+    .modal-footer {
+      padding: 12px 20px; border-top: 1px solid var(--border);
+      display: flex; gap: 8px; justify-content: flex-end;
+    }
+
+    .form-row { margin-bottom: 14px; }
+    .form-label {
+      display: block; font-size: 12px; font-weight: 500; color: var(--text-muted);
+      margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .form-input, .form-textarea {
+      width: 100%; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 6px; padding: 8px 12px; color: var(--text); font-size: 13px;
+      font-family: inherit; outline: none;
+    }
+    .form-input:focus, .form-textarea:focus { border-color: var(--blue); }
+    .form-textarea { resize: vertical; min-height: 60px; }
+
+    /* Conversation thread */
+    .thread-msg {
+      padding: 12px; border-radius: 8px; margin-bottom: 10px;
+      border: 1px solid var(--border); background: var(--bg);
+    }
+    .thread-msg.sent { border-left: 3px solid var(--blue); }
+    .thread-msg.received { border-left: 3px solid var(--green); }
+    .thread-meta {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 11px; color: var(--text-muted); margin-bottom: 6px;
+    }
+    .thread-subject { font-weight: 600; color: var(--text); margin-bottom: 4px; font-size: 13px; }
+    .thread-body { font-size: 13px; color: var(--text); white-space: pre-wrap; font-family: inherit; }
+    .direction-tag {
+      padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600;
+    }
+    .direction-tag.sent { background: #0d2236; color: var(--blue); }
+    .direction-tag.received { background: #0d2d1b; color: var(--green); }
+
     .refresh-info { color: var(--text-muted); font-size: 11px; }
 
-    /* ── Responsive ── */
     @media (max-width: 768px) {
-      .header { padding: 0 12px; }
+      .header { padding: 0 12px; flex-wrap: wrap; height: auto; }
       .main { padding: 12px; }
-      .search-input { width: 160px; }
-      .stats-grid { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px; }
+      .metrics-section { grid-template-columns: 1fr; }
+      .search-input { width: 100%; }
     }
   </style>
 </head>
@@ -384,42 +353,47 @@
     <span class="brand">DevCenter <span>/ Email Agent</span></span>
   </div>
   <div class="header-right">
-    <span class="refresh-info" id="refreshInfo">Auto-refresh: 30s</span>
+    <span class="refresh-info" id="refreshInfo">Auto: 30s</span>
     <div class="status-badge">
       <div class="status-dot" id="statusDot"></div>
       <span id="statusText">Idle</span>
     </div>
+    <button class="btn btn-ghost" onclick="openAddModal()">+ Add Lead</button>
     <label class="btn btn-ghost" style="cursor:pointer;">
       Upload CSV
-      <input type="file" id="csvUpload" accept=".csv,.xlsx" style="display:none;" onchange="handleUpload(this)">
+      <input type="file" id="csvUpload" accept=".csv" style="display:none;" onchange="handleUpload(this)">
     </label>
+    <button class="btn btn-ghost" onclick="exportCsv()">Export CSV</button>
     <button class="btn btn-primary" id="runBtn" onclick="triggerRun()">Run Now</button>
   </div>
 </header>
 
 <main class="main">
 
-  <!-- Last Run Banner -->
-  <div class="last-run" id="lastRunBanner" style="display:none;">
-    <div class="last-run-left">
-      <span id="lastRunIcon"></span>
-      <div>
-        <div class="last-run-label">Last run</div>
-        <div class="last-run-summary" id="lastRunSummary">--</div>
+  <!-- Metrics + recent runs -->
+  <div class="metrics-section">
+    <div class="chart-card">
+      <div class="chart-title">Last 30 Days</div>
+      <svg class="chart-svg" id="metricsChart"></svg>
+    </div>
+    <div class="runs-card">
+      <div class="chart-title">Recent Runs</div>
+      <div class="runs-list" id="runsList">
+        <div style="color:var(--text-muted);font-size:12px;">Loading...</div>
       </div>
     </div>
-    <span class="last-run-time" id="lastRunTime"></span>
   </div>
 
-  <!-- Stats (clickable to filter) -->
-  <div class="stats-grid" id="statsGrid">
+  <!-- Stats -->
+  <div class="stats-grid">
     <div class="stat-card" onclick="filterByStatus('')" id="card-total"><div class="stat-label">Total</div><div class="stat-value" id="s-total">--</div></div>
     <div class="stat-card" onclick="filterByStatus('pending')" id="card-pending"><div class="stat-label">Pending</div><div class="stat-value blue" id="s-pending">--</div></div>
     <div class="stat-card" onclick="filterByStatus('sent')" id="card-sent"><div class="stat-label">Sent</div><div class="stat-value yellow" id="s-sent">--</div></div>
-    <div class="stat-card" onclick="filterByStatus('followed_up')" id="card-followed"><div class="stat-label">Follow-ups</div><div class="stat-value orange" id="s-followed">--</div></div>
+    <div class="stat-card" onclick="filterByStatus('followed_up_1')" id="card-followed"><div class="stat-label">Follow-ups</div><div class="stat-value orange" id="s-followed">--</div></div>
     <div class="stat-card" onclick="filterByStatus('replied')" id="card-replied"><div class="stat-label">Replied</div><div class="stat-value green" id="s-replied">--</div></div>
     <div class="stat-card" onclick="filterByStatus('converted')" id="card-converted"><div class="stat-label">Converted</div><div class="stat-value purple" id="s-converted">--</div></div>
     <div class="stat-card" onclick="filterByStatus('do_not_contact')" id="card-ghosted"><div class="stat-label">Ghosted</div><div class="stat-value red" id="s-ghosted">--</div></div>
+    <div class="stat-card" onclick="filterByStatus('unsubscribed')" id="card-unsub"><div class="stat-label">Unsubscribed</div><div class="stat-value" id="s-unsub">--</div></div>
   </div>
 
   <!-- Tabs -->
@@ -428,7 +402,7 @@
     <button class="tab" onclick="switchTab('logs', this)">Activity Log</button>
   </div>
 
-  <!-- Contacts Tab -->
+  <!-- Contacts -->
   <div id="tab-contacts">
     <div class="controls">
       <input class="search-input" id="contactSearch" placeholder="Search name, email, company..." oninput="filterContacts()">
@@ -448,25 +422,37 @@
       </select>
       <span class="count-label" id="contactCount"></span>
     </div>
+
+    <!-- Bulk action bar -->
+    <div class="bulk-bar" id="bulkBar">
+      <span class="bulk-count" id="bulkCount">0 selected</span>
+      <button class="btn btn-sm btn-ghost" onclick="bulkSetStatus('pending')">Set Pending</button>
+      <button class="btn btn-sm btn-ghost" onclick="bulkSetStatus('converted')">Mark Converted</button>
+      <button class="btn btn-sm btn-ghost" onclick="bulkSetStatus('do_not_contact')">Mark Ghosted</button>
+      <button class="btn btn-sm btn-danger" onclick="bulkDelete()">Delete</button>
+      <button class="btn btn-sm btn-ghost" onclick="clearSelection()" style="margin-left:auto;">Clear</button>
+    </div>
+
     <div class="table-wrap">
       <div class="table-scroll">
         <table id="contactsTable">
           <thead>
             <tr>
+              <th class="checkbox-col no-sort"><input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)"></th>
               <th onclick="sortContacts('Name')">Name <span class="sort-icon" id="sort-Name"></span></th>
               <th onclick="sortContacts('Email')">Email <span class="sort-icon" id="sort-Email"></span></th>
               <th onclick="sortContacts('Company')">Company <span class="sort-icon" id="sort-Company"></span></th>
               <th>Role</th>
               <th>Industry</th>
               <th onclick="sortContacts('Status')">Status <span class="sort-icon" id="sort-Status"></span></th>
-              <th onclick="sortContacts('Last Action Date')">Last Action <span class="sort-icon" id="sort-Last Action Date"></span></th>
+              <th onclick="sortContacts('Last Action Date')">Last Action <span class="sort-icon" id="sort-LastDate"></span></th>
               <th>Follow-ups</th>
               <th>Replied</th>
-              <th>Next Action</th>
+              <th class="no-sort">Actions</th>
             </tr>
           </thead>
           <tbody id="contactsBody">
-            <tr><td colspan="10" class="loading"><span class="spinner"></span>Loading contacts...</td></tr>
+            <tr><td colspan="11" class="loading"><span class="spinner"></span>Loading...</td></tr>
           </tbody>
         </table>
       </div>
@@ -474,7 +460,7 @@
     </div>
   </div>
 
-  <!-- Logs Tab -->
+  <!-- Logs -->
   <div id="tab-logs" style="display:none;">
     <div class="controls">
       <input class="search-input" id="logSearch" placeholder="Search logs..." oninput="filterLogs()">
@@ -487,12 +473,12 @@
             <tr>
               <th>Date</th>
               <th>Contact Email</th>
-              <th>Action Taken</th>
-              <th>Outcome Summary</th>
+              <th>Action</th>
+              <th>Outcome</th>
             </tr>
           </thead>
           <tbody id="logsBody">
-            <tr><td colspan="4" class="loading"><span class="spinner"></span>Loading logs...</td></tr>
+            <tr><td colspan="4" class="loading"><span class="spinner"></span>Loading...</td></tr>
           </tbody>
         </table>
       </div>
@@ -502,6 +488,75 @@
 
 </main>
 
+<!-- Add/Edit Modal -->
+<div class="modal-backdrop" id="editModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="editTitle">Add Lead</div>
+      <button class="modal-close" onclick="closeModal('editModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <label class="form-label">Name</label>
+        <input class="form-input" id="f-name">
+      </div>
+      <div class="form-row">
+        <label class="form-label">Email</label>
+        <input class="form-input" id="f-email" type="email">
+      </div>
+      <div class="form-row">
+        <label class="form-label">Company</label>
+        <input class="form-input" id="f-company">
+      </div>
+      <div class="form-row">
+        <label class="form-label">Role / Title</label>
+        <input class="form-input" id="f-role">
+      </div>
+      <div class="form-row">
+        <label class="form-label">Industry</label>
+        <input class="form-input" id="f-industry">
+      </div>
+      <div class="form-row">
+        <label class="form-label">Notes</label>
+        <textarea class="form-textarea" id="f-notes" rows="3"></textarea>
+      </div>
+      <div class="form-row" id="f-status-row" style="display:none;">
+        <label class="form-label">Status</label>
+        <select class="form-input" id="f-status">
+          <option value="pending">Pending</option>
+          <option value="sent">Sent</option>
+          <option value="followed_up_1">Followed Up #1</option>
+          <option value="followed_up_2">Followed Up #2</option>
+          <option value="replied">Replied</option>
+          <option value="converted">Converted</option>
+          <option value="do_not_contact">Ghosted</option>
+          <option value="unsubscribed">Unsubscribed</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('editModal')">Cancel</button>
+      <button class="btn btn-primary" id="saveBtn" onclick="saveContact()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- History Modal -->
+<div class="modal-backdrop" id="historyModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="historyTitle">Conversation</div>
+      <button class="modal-close" onclick="closeModal('historyModal')">×</button>
+    </div>
+    <div class="modal-body" id="historyBody">
+      <div class="loading"><span class="spinner"></span>Loading...</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('historyModal')">Close</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -510,43 +565,40 @@
   let filteredContacts = [];
   let filteredLogs = [];
   let refreshTimer;
-
-  // Pagination state
   let contactPage = 1;
   let logPage = 1;
   let perPage = 25;
-
-  // Sort state
   let sortField = '';
   let sortDir = 'asc';
+  let selectedEmails = new Set();
+  let editingEmail = null;
 
-  // ── Init ──────────────────────────────────────────────────────
   async function init() {
-    await Promise.all([loadStats(), loadContacts(), loadLogs(), loadStatus()]);
+    await Promise.all([loadStats(), loadContacts(), loadLogs(), loadStatus(), loadMetrics(), loadRuns()]);
     scheduleRefresh();
   }
 
   function scheduleRefresh() {
     clearTimeout(refreshTimer);
     refreshTimer = setTimeout(async () => {
-      await Promise.all([loadStats(), loadContacts(), loadLogs(), loadStatus()]);
+      await Promise.all([loadStats(), loadContacts(), loadLogs(), loadStatus(), loadMetrics(), loadRuns()]);
       scheduleRefresh();
     }, 30000);
   }
 
-  // ── API Calls ─────────────────────────────────────────────────
   async function loadStats() {
     try {
       const r = await fetch('/api/stats');
       const { data } = await r.json();
       if (!data) return;
-      document.getElementById('s-total').textContent    = data.total ?? '--';
-      document.getElementById('s-pending').textContent  = data.pending ?? '--';
-      document.getElementById('s-sent').textContent     = data.sent ?? '--';
+      document.getElementById('s-total').textContent = data.total ?? '--';
+      document.getElementById('s-pending').textContent = data.pending ?? '--';
+      document.getElementById('s-sent').textContent = data.sent ?? '--';
       document.getElementById('s-followed').textContent = data.followed_up ?? '--';
-      document.getElementById('s-replied').textContent  = data.replied ?? '--';
+      document.getElementById('s-replied').textContent = data.replied ?? '--';
       document.getElementById('s-converted').textContent = data.converted ?? '--';
-      document.getElementById('s-ghosted').textContent  = data.ghosted ?? '--';
+      document.getElementById('s-ghosted').textContent = data.ghosted ?? '--';
+      document.getElementById('s-unsub').textContent = data.unsubscribed ?? '--';
     } catch {}
   }
 
@@ -559,7 +611,7 @@
       filterContacts();
     } catch {
       document.getElementById('contactsBody').innerHTML =
-        '<tr><td colspan="10" class="empty"><div class="empty-icon">!</div><div>Failed to load contacts</div></td></tr>';
+        '<tr><td colspan="11" class="empty">Failed to load contacts</td></tr>';
     }
   }
 
@@ -575,7 +627,7 @@
   async function loadStatus() {
     try {
       const r = await fetch('/api/status');
-      const { isRunning, lastRunResult } = await r.json();
+      const { isRunning, lastRunResult, runLabel } = await r.json();
 
       const dot = document.getElementById('statusDot');
       const text = document.getElementById('statusText');
@@ -583,7 +635,7 @@
 
       if (isRunning) {
         dot.className = 'status-dot running';
-        text.textContent = 'Running...';
+        text.textContent = runLabel || 'Running...';
         btn.disabled = true;
         btn.textContent = 'Running...';
       } else {
@@ -592,26 +644,78 @@
         btn.disabled = false;
         btn.textContent = 'Run Now';
       }
-
-      if (lastRunResult) {
-        const banner = document.getElementById('lastRunBanner');
-        banner.style.display = 'flex';
-        document.getElementById('lastRunSummary').textContent =
-          lastRunResult.summary || (lastRunResult.error ? 'Error: ' + lastRunResult.error : 'Completed');
-        document.getElementById('lastRunTime').textContent =
-          formatDate(lastRunResult.timestamp);
-        document.getElementById('lastRunIcon').textContent =
-          lastRunResult.success === false ? '!' : 'OK';
-      }
     } catch {}
   }
 
-  // ── Run Agent ─────────────────────────────────────────────────
+  async function loadMetrics() {
+    try {
+      const r = await fetch('/api/metrics?days=30');
+      const { data } = await r.json();
+      renderChart(data || []);
+    } catch {}
+  }
+
+  async function loadRuns() {
+    try {
+      const r = await fetch('/api/run-history?limit=8');
+      const { data } = await r.json();
+      renderRuns(data || []);
+    } catch {}
+  }
+
+  function renderChart(metrics) {
+    const svg = document.getElementById('metricsChart');
+    if (!metrics.length) {
+      svg.innerHTML = '<text x="50%" y="50%" text-anchor="middle" fill="#8b949e" font-size="12">No data yet</text>';
+      return;
+    }
+
+    const w = svg.clientWidth || 600;
+    const h = 140;
+    const pad = { top: 10, right: 10, bottom: 20, left: 30 };
+
+    const days = metrics.map(m => m.date);
+    const sent = metrics.map(m => m.emails_sent || 0);
+    const replied = metrics.map(m => m.replies_handled || 0);
+
+    const maxY = Math.max(1, ...sent, ...replied);
+    const xStep = (w - pad.left - pad.right) / Math.max(1, days.length - 1);
+    const yScale = (v) => h - pad.bottom - (v / maxY) * (h - pad.top - pad.bottom);
+
+    const pointsSent = sent.map((v, i) => `${pad.left + i * xStep},${yScale(v)}`).join(' ');
+    const pointsReplied = replied.map((v, i) => `${pad.left + i * xStep},${yScale(v)}`).join(' ');
+
+    svg.innerHTML = `
+      <g>
+        <line x1="${pad.left}" y1="${h - pad.bottom}" x2="${w - pad.right}" y2="${h - pad.bottom}" stroke="#30363d" />
+        <text x="${pad.left - 5}" y="${pad.top + 5}" text-anchor="end" fill="#8b949e" font-size="10">${maxY}</text>
+        <text x="${pad.left - 5}" y="${h - pad.bottom}" text-anchor="end" fill="#8b949e" font-size="10">0</text>
+        <polyline points="${pointsSent}" fill="none" stroke="#58a6ff" stroke-width="2" />
+        <polyline points="${pointsReplied}" fill="none" stroke="#3fb950" stroke-width="2" />
+        <text x="${w - pad.right}" y="${pad.top + 10}" text-anchor="end" fill="#58a6ff" font-size="10">Sent</text>
+        <text x="${w - pad.right}" y="${pad.top + 22}" text-anchor="end" fill="#3fb950" font-size="10">Replies</text>
+      </g>
+    `;
+  }
+
+  function renderRuns(runs) {
+    const el = document.getElementById('runsList');
+    if (!runs.length) {
+      el.innerHTML = '<div style="color:var(--text-muted);font-size:12px;">No runs yet</div>';
+      return;
+    }
+    el.innerHTML = runs.map(r => `
+      <div class="run-item${r.success === false ? ' error' : ''}">
+        <div class="run-time">${formatDate(r.timestamp)} · ${esc(r.trigger)} · ${esc(r.kind)}</div>
+        <div class="run-summary">${esc(r.summary || 'No summary')}</div>
+      </div>
+    `).join('');
+  }
+
   async function triggerRun() {
     const btn = document.getElementById('runBtn');
     btn.disabled = true;
     btn.textContent = 'Starting...';
-
     try {
       const r = await fetch('/api/run', { method: 'POST' });
       const { success, error } = await r.json();
@@ -621,11 +725,11 @@
           await loadStatus();
           if (!document.getElementById('runBtn').disabled) {
             clearInterval(poll);
-            await Promise.all([loadStats(), loadContacts(), loadLogs()]);
+            await Promise.all([loadStats(), loadContacts(), loadLogs(), loadRuns(), loadMetrics()]);
           }
         }, 3000);
       } else {
-        showToast(error || 'Failed to start agent', 'error');
+        showToast(error || 'Failed to start', 'error');
         btn.disabled = false;
         btn.textContent = 'Run Now';
       }
@@ -636,7 +740,6 @@
     }
   }
 
-  // ── Tabs ──────────────────────────────────────────────────────
   function switchTab(name, el) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     el.classList.add('active');
@@ -644,78 +747,50 @@
     document.getElementById('tab-logs').style.display = name === 'logs' ? '' : 'none';
   }
 
-  // ── Filter by clicking stat cards ─────────────────────────────
   function filterByStatus(status) {
     const sel = document.getElementById('statusFilter');
-
-    // Handle "followed_up" which covers both followed_up_1 and followed_up_2
-    if (status === 'followed_up') {
-      sel.value = 'followed_up_1';
-    } else {
-      sel.value = status;
-    }
-
-    // Highlight active card
+    sel.value = status;
     document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('active'));
-    if (status) {
-      const cardMap = {
-        'pending': 'card-pending', 'sent': 'card-sent', 'followed_up': 'card-followed',
-        'followed_up_1': 'card-followed', 'followed_up_2': 'card-followed',
-        'replied': 'card-replied', 'converted': 'card-converted', 'do_not_contact': 'card-ghosted'
-      };
-      const card = document.getElementById(cardMap[status]);
-      if (card) card.classList.add('active');
-    }
-
+    const map = { '': 'card-total', pending: 'card-pending', sent: 'card-sent', followed_up_1: 'card-followed', replied: 'card-replied', converted: 'card-converted', do_not_contact: 'card-ghosted', unsubscribed: 'card-unsub' };
+    const card = document.getElementById(map[status] || '');
+    if (card) card.classList.add('active');
     contactPage = 1;
     filterContacts();
   }
 
-  // ── Industry filter ───────────────────────────────────────────
   function populateIndustryFilter() {
     const sel = document.getElementById('industryFilter');
     const current = sel.value;
     const industries = [...new Set(allContacts.map(c => c.Industry).filter(Boolean))].sort();
     sel.innerHTML = '<option value="">All Industries</option>' +
-      industries.map(i => '<option value="' + esc(i) + '">' + esc(i) + '</option>').join('');
+      industries.map(i => `<option value="${esc(i)}">${esc(i)}</option>`).join('');
     sel.value = current;
   }
 
-  // ── Sort ──────────────────────────────────────────────────────
   function sortContacts(field) {
-    if (sortField === field) {
-      sortDir = sortDir === 'asc' ? 'desc' : 'asc';
-    } else {
-      sortField = field;
-      sortDir = 'asc';
-    }
-    // Update sort icons
+    if (sortField === field) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+    else { sortField = field; sortDir = 'asc'; }
     document.querySelectorAll('.sort-icon').forEach(el => el.textContent = '');
-    const icon = document.getElementById('sort-' + field);
+    const icon = document.getElementById('sort-' + field.replace(' Action Date', 'LastDate')) || document.getElementById('sort-' + field);
     if (icon) icon.textContent = sortDir === 'asc' ? ' ^' : ' v';
-
     contactPage = 1;
     filterContacts();
   }
 
-  // ── Contact Table ─────────────────────────────────────────────
   function filterContacts() {
     const search = (document.getElementById('contactSearch').value || '').toLowerCase();
     const status = (document.getElementById('statusFilter').value || '').toLowerCase();
-    const industry = (document.getElementById('industryFilter').value || '');
+    const industry = document.getElementById('industryFilter').value || '';
 
     filteredContacts = allContacts.filter(c => {
       const matchSearch = !search ||
         (c.Name || '').toLowerCase().includes(search) ||
         (c.Email || '').toLowerCase().includes(search) ||
-        (c.Company || '').toLowerCase().includes(search) ||
-        (c.Industry || '').toLowerCase().includes(search);
+        (c.Company || '').toLowerCase().includes(search);
 
       let matchStatus;
-      if (!status) {
-        matchStatus = true;
-      } else if (status === 'followed_up_1') {
-        // When clicking follow-ups card, show both
+      if (!status) matchStatus = true;
+      else if (status === 'followed_up_1') {
         const s = (c.Status || 'pending').toLowerCase();
         matchStatus = s === 'followed_up_1' || s === 'followed_up_2';
       } else {
@@ -726,7 +801,6 @@
       return matchSearch && matchStatus && matchIndustry;
     });
 
-    // Sort
     if (sortField) {
       filteredContacts.sort((a, b) => {
         const va = (a[sortField] || '').toString().toLowerCase();
@@ -737,7 +811,7 @@
       });
     }
 
-    document.getElementById('contactCount').textContent = filteredContacts.length + ' contact' + (filteredContacts.length !== 1 ? 's' : '');
+    document.getElementById('contactCount').textContent = `${filteredContacts.length} contact${filteredContacts.length !== 1 ? 's' : ''}`;
     renderContactsPage();
   }
 
@@ -750,35 +824,35 @@
 
   function renderContacts(contacts) {
     const tbody = document.getElementById('contactsBody');
-
     if (!contacts.length) {
-      tbody.innerHTML = '<tr><td colspan="10"><div class="empty">' +
-        '<div class="empty-title">No contacts found</div>' +
-        '<div>Try a different filter or upload leads</div></div></td></tr>';
+      tbody.innerHTML = '<tr><td colspan="11"><div class="empty"><div class="empty-title">No contacts found</div><div>Try different filter or add leads</div></div></td></tr>';
       return;
     }
 
     tbody.innerHTML = contacts.map(c => {
-      const lastAction = c['Last Action'] ? esc(c['Last Action']) : '--';
-      const lastDate = c['Last Action Date'] ? esc(c['Last Action Date']) : '';
-      const lastCol = lastDate ? lastAction + '<br><span style="color:var(--text-muted);font-size:11px;">' + lastDate + '</span>' : lastAction;
-
-      return '<tr>' +
-        '<td title="' + esc(c.Name) + '"><strong>' + (esc(c.Name) || '--') + '</strong></td>' +
-        '<td title="' + esc(c.Email) + '" style="color:var(--blue);font-family:monospace;font-size:12px;">' + (esc(c.Email) || '--') + '</td>' +
-        '<td title="' + esc(c.Company) + '">' + (esc(c.Company) || '--') + '</td>' +
-        '<td style="color:var(--text-muted);">' + (esc(c['Role/Title']) || '--') + '</td>' +
-        '<td style="color:var(--text-muted);">' + (esc(c.Industry) || '--') + '</td>' +
-        '<td>' + statusBadge(c.Status) + '</td>' +
-        '<td style="font-size:12px;white-space:normal;max-width:160px;">' + lastCol + '</td>' +
-        '<td style="text-align:center;color:var(--orange);">' + (c['Follow Up Count'] || 0) + '</td>' +
-        '<td>' + (c.Replied === 'YES' ? '<span style="color:var(--green)">YES</span>' : '<span style="color:var(--text-muted)">NO</span>') + '</td>' +
-        '<td title="' + esc(c['Next Scheduled Action']) + '" style="font-size:12px;color:var(--text-muted);">' + (esc((c['Next Scheduled Action'] || '').slice(0, 30)) || '--') + '</td>' +
-      '</tr>';
+      const emailAttr = esc(c.Email);
+      const checked = selectedEmails.has(c.Email) ? 'checked' : '';
+      return `
+        <tr>
+          <td class="checkbox-col"><input type="checkbox" data-email="${emailAttr}" ${checked} onchange="toggleRow(this)"></td>
+          <td title="${esc(c.Name)}"><strong>${esc(c.Name) || '--'}</strong></td>
+          <td title="${emailAttr}" style="color:var(--blue);font-family:monospace;font-size:12px;">${emailAttr || '--'}</td>
+          <td title="${esc(c.Company)}">${esc(c.Company) || '--'}</td>
+          <td style="color:var(--text-muted);">${esc(c['Role/Title']) || '--'}</td>
+          <td style="color:var(--text-muted);">${esc(c.Industry) || '--'}</td>
+          <td>${statusBadge(c.Status)}</td>
+          <td style="font-size:12px;">${esc(c['Last Action']) || '--'}<br><span style="color:var(--text-muted);font-size:11px;">${esc(c['Last Action Date']) || ''}</span></td>
+          <td style="text-align:center;color:var(--orange);">${c['Follow Up Count'] || 0}</td>
+          <td>${c.Replied === 'YES' ? '<span style="color:var(--green)">YES</span>' : '<span style="color:var(--text-muted)">NO</span>'}</td>
+          <td class="row-actions">
+            <button class="btn btn-sm btn-ghost" onclick="viewHistory('${emailAttr}')">View</button>
+            <button class="btn btn-sm btn-ghost" onclick="openEditModal('${emailAttr}')">Edit</button>
+          </td>
+        </tr>
+      `;
     }).join('');
   }
 
-  // ── Log Table ─────────────────────────────────────────────────
   function filterLogs() {
     const search = (document.getElementById('logSearch').value || '').toLowerCase();
     filteredLogs = allLogs.filter(l =>
@@ -787,7 +861,7 @@
       (l['Action Taken'] || '').toLowerCase().includes(search) ||
       (l['Outcome Summary'] || '').toLowerCase().includes(search)
     );
-    document.getElementById('logCount').textContent = filteredLogs.length + ' entr' + (filteredLogs.length !== 1 ? 'ies' : 'y');
+    document.getElementById('logCount').textContent = `${filteredLogs.length} entr${filteredLogs.length !== 1 ? 'ies' : 'y'}`;
     logPage = 1;
     renderLogsPage();
   }
@@ -802,52 +876,45 @@
   function renderLogs(logs) {
     const tbody = document.getElementById('logsBody');
     if (!logs.length) {
-      tbody.innerHTML = '<tr><td colspan="4"><div class="empty">' +
-        '<div class="empty-title">No activity yet</div>' +
-        '<div>Run the agent to see activity here</div></div></td></tr>';
+      tbody.innerHTML = '<tr><td colspan="4"><div class="empty"><div class="empty-title">No activity yet</div></div></td></tr>';
       return;
     }
     tbody.innerHTML = logs.map(l =>
-      '<tr>' +
-        '<td style="white-space:nowrap;color:var(--text-muted);font-size:12px;">' + (esc(l.Date) || '--') + '</td>' +
-        '<td style="color:var(--blue);font-family:monospace;font-size:12px;">' + (esc(l['Contact Email']) || '--') + '</td>' +
-        '<td class="log-action">' + (esc(l['Action Taken']) || '--') + '</td>' +
-        '<td class="log-outcome" title="' + esc(l['Outcome Summary']) + '">' + (esc(l['Outcome Summary']) || '--') + '</td>' +
-      '</tr>'
+      `<tr>
+        <td style="white-space:nowrap;color:var(--text-muted);font-size:12px;">${esc(l.Date) || '--'}</td>
+        <td style="color:var(--blue);font-family:monospace;font-size:12px;">${esc(l['Contact Email']) || '--'}</td>
+        <td>${esc(l['Action Taken']) || '--'}</td>
+        <td style="color:var(--text-muted);font-size:12px;max-width:350px;overflow:hidden;text-overflow:ellipsis;" title="${esc(l['Outcome Summary'])}">${esc(l['Outcome Summary']) || '--'}</td>
+      </tr>`
     ).join('');
   }
 
-  // ── Pagination ────────────────────────────────────────────────
   function renderPagination(containerId, totalItems, currentPage, onPageChange) {
     const container = document.getElementById(containerId);
     const totalPages = Math.ceil(totalItems / perPage) || 1;
 
     if (totalItems <= perPage) {
-      container.innerHTML = '<div class="pagination-info">Showing all ' + totalItems + ' items</div><div></div>';
+      container.innerHTML = `<div class="pagination-info">Showing all ${totalItems} items</div><div></div>`;
       return;
     }
 
     const start = (currentPage - 1) * perPage + 1;
     const end = Math.min(currentPage * perPage, totalItems);
 
-    container.innerHTML =
-      '<div class="pagination-info">Showing ' + start + '-' + end + ' of ' + totalItems + '</div>' +
-      '<div class="pagination-btns">' +
-        '<select class="per-page-select" onchange="changePerPage(this.value)">' +
-          [25, 50, 100].map(n => '<option value="' + n + '"' + (perPage === n ? ' selected' : '') + '>' + n + '/page</option>').join('') +
-        '</select>' +
-        '<button onclick="paginateContacts(' + (currentPage - 1) + ')"' + (currentPage <= 1 ? ' disabled' : '') + '>Prev</button>' +
-        '<span class="page-current">' + currentPage + ' / ' + totalPages + '</span>' +
-        '<button onclick="paginateContacts(' + (currentPage + 1) + ')"' + (currentPage >= totalPages ? ' disabled' : '') + '>Next</button>' +
-      '</div>';
+    const btnPrev = `<button onclick="jumpPage('${containerId}', ${currentPage - 1})" ${currentPage <= 1 ? 'disabled' : ''}>Prev</button>`;
+    const btnNext = `<button onclick="jumpPage('${containerId}', ${currentPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''}>Next</button>`;
+    const perPageSel = `<select class="per-page-select" onchange="changePerPage(this.value)">${[25,50,100,200].map(n => `<option value="${n}" ${perPage===n?'selected':''}>${n}/page</option>`).join('')}</select>`;
 
-    // Store callback for pagination buttons
+    container.innerHTML = `
+      <div class="pagination-info">Showing ${start}-${end} of ${totalItems}</div>
+      <div class="pagination-btns">${perPageSel}${btnPrev}<span class="page-current">${currentPage} / ${totalPages}</span>${btnNext}</div>
+    `;
     container._onPageChange = onPageChange;
   }
 
-  function paginateContacts(page) {
-    contactPage = page;
-    renderContactsPage();
+  function jumpPage(containerId, page) {
+    if (containerId === 'contactsPagination') { contactPage = page; renderContactsPage(); }
+    else { logPage = page; renderLogsPage(); }
   }
 
   function changePerPage(val) {
@@ -858,7 +925,253 @@
     renderLogsPage();
   }
 
-  // ── Helpers ───────────────────────────────────────────────────
+  // ── Selection ────────────────────────────────────────────────
+  function toggleRow(cb) {
+    const email = cb.dataset.email;
+    if (cb.checked) selectedEmails.add(email);
+    else selectedEmails.delete(email);
+    updateBulkBar();
+  }
+
+  function toggleSelectAll(cb) {
+    const rows = document.querySelectorAll('#contactsBody input[type=checkbox]');
+    rows.forEach(r => {
+      r.checked = cb.checked;
+      const email = r.dataset.email;
+      if (cb.checked) selectedEmails.add(email);
+      else selectedEmails.delete(email);
+    });
+    updateBulkBar();
+  }
+
+  function clearSelection() {
+    selectedEmails.clear();
+    document.getElementById('selectAll').checked = false;
+    document.querySelectorAll('#contactsBody input[type=checkbox]').forEach(r => r.checked = false);
+    updateBulkBar();
+  }
+
+  function updateBulkBar() {
+    const bar = document.getElementById('bulkBar');
+    const count = selectedEmails.size;
+    if (count > 0) {
+      bar.classList.add('show');
+      document.getElementById('bulkCount').textContent = `${count} selected`;
+    } else {
+      bar.classList.remove('show');
+    }
+  }
+
+  async function bulkSetStatus(status) {
+    if (selectedEmails.size === 0) return;
+    const r = await fetch('/api/contacts/bulk-action', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ emails: [...selectedEmails], action: 'setStatus', status })
+    });
+    const result = await r.json();
+    if (result.success) {
+      showToast(`Updated ${result.affected} contacts`, 'success');
+      clearSelection();
+      await Promise.all([loadStats(), loadContacts()]);
+    } else showToast(result.error, 'error');
+  }
+
+  async function bulkDelete() {
+    if (selectedEmails.size === 0) return;
+    if (!confirm(`Delete ${selectedEmails.size} contacts? (Soft delete — can be recovered from DB)`)) return;
+    const r = await fetch('/api/contacts/bulk-action', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ emails: [...selectedEmails], action: 'delete' })
+    });
+    const result = await r.json();
+    if (result.success) {
+      showToast(`Deleted ${result.affected} contacts`, 'success');
+      clearSelection();
+      await Promise.all([loadStats(), loadContacts()]);
+    } else showToast(result.error, 'error');
+  }
+
+  // ── Add/Edit Modal ───────────────────────────────────────────
+  function openAddModal() {
+    editingEmail = null;
+    document.getElementById('editTitle').textContent = 'Add Lead';
+    document.getElementById('f-name').value = '';
+    document.getElementById('f-email').value = '';
+    document.getElementById('f-email').disabled = false;
+    document.getElementById('f-company').value = '';
+    document.getElementById('f-role').value = '';
+    document.getElementById('f-industry').value = '';
+    document.getElementById('f-notes').value = '';
+    document.getElementById('f-status-row').style.display = 'none';
+    document.getElementById('editModal').classList.add('show');
+  }
+
+  function openEditModal(email) {
+    const c = allContacts.find(x => x.Email === email);
+    if (!c) return;
+    editingEmail = email;
+    document.getElementById('editTitle').textContent = 'Edit Lead';
+    document.getElementById('f-name').value = c.Name || '';
+    document.getElementById('f-email').value = c.Email;
+    document.getElementById('f-email').disabled = true;
+    document.getElementById('f-company').value = c.Company || '';
+    document.getElementById('f-role').value = c['Role/Title'] || '';
+    document.getElementById('f-industry').value = c.Industry || '';
+    document.getElementById('f-notes').value = c.Notes || '';
+    document.getElementById('f-status').value = (c.Status || 'pending').toLowerCase();
+    document.getElementById('f-status-row').style.display = '';
+    document.getElementById('editModal').classList.add('show');
+  }
+
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('show');
+  }
+
+  async function saveContact() {
+    const data = {
+      Name: document.getElementById('f-name').value.trim(),
+      Email: document.getElementById('f-email').value.trim(),
+      Company: document.getElementById('f-company').value.trim(),
+      'Role/Title': document.getElementById('f-role').value.trim(),
+      Industry: document.getElementById('f-industry').value.trim(),
+      Notes: document.getElementById('f-notes').value.trim()
+    };
+
+    if (!data.Email) return showToast('Email required', 'error');
+
+    let r, result;
+    if (editingEmail) {
+      data.Status = document.getElementById('f-status').value;
+      delete data.Email;
+      r = await fetch('/api/contacts/' + encodeURIComponent(editingEmail), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+    } else {
+      r = await fetch('/api/contacts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+    }
+    result = await r.json();
+
+    if (result.success) {
+      showToast(editingEmail ? 'Contact updated' : 'Contact added', 'success');
+      closeModal('editModal');
+      await Promise.all([loadStats(), loadContacts()]);
+    } else {
+      showToast(result.error || 'Failed to save', 'error');
+    }
+  }
+
+  // ── Conversation history ────────────────────────────────────
+  async function viewHistory(email) {
+    document.getElementById('historyTitle').textContent = 'Conversation: ' + email;
+    document.getElementById('historyBody').innerHTML = '<div class="loading"><span class="spinner"></span>Loading...</div>';
+    document.getElementById('historyModal').classList.add('show');
+
+    try {
+      const r = await fetch('/api/contacts/' + encodeURIComponent(email) + '/history');
+      const { success, data, error } = await r.json();
+      if (!success) {
+        document.getElementById('historyBody').innerHTML = `<div class="empty">${esc(error || 'Failed')}</div>`;
+        return;
+      }
+      if (!data.conversation || data.conversation.length === 0) {
+        document.getElementById('historyBody').innerHTML = '<div class="empty"><div class="empty-title">No messages</div><div>Nothing sent or received yet</div></div>';
+        return;
+      }
+      document.getElementById('historyBody').innerHTML = data.conversation.map(m => `
+        <div class="thread-msg ${esc(m.direction)}">
+          <div class="thread-meta">
+            <span class="direction-tag ${esc(m.direction)}">${m.direction === 'sent' ? 'SENT' : 'RECEIVED'}</span>
+            <span>${esc(m.date)}</span>
+          </div>
+          ${m.subject ? `<div class="thread-subject">${esc(m.subject)}</div>` : ''}
+          <div class="thread-body">${esc(m.body)}</div>
+        </div>
+      `).join('');
+    } catch (err) {
+      document.getElementById('historyBody').innerHTML = `<div class="empty">Error: ${esc(err.message)}</div>`;
+    }
+  }
+
+  // ── Export ──────────────────────────────────────────────────
+  function exportCsv() {
+    const status = document.getElementById('statusFilter').value;
+    const industry = document.getElementById('industryFilter').value;
+    const params = new URLSearchParams();
+    if (status) params.append('status', status);
+    if (industry) params.append('industry', industry);
+    window.location.href = '/api/export?' + params.toString();
+  }
+
+  // ── CSV Upload ──────────────────────────────────────────────
+  async function handleUpload(input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      if (!file.name.endsWith('.csv')) {
+        showToast('Please use CSV format', 'error');
+        input.value = '';
+        return;
+      }
+
+      const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+      if (lines.length < 2) { showToast('CSV is empty', 'error'); input.value = ''; return; }
+
+      const headers = parseCsvLine(lines[0]);
+      const contacts = [];
+      for (let i = 1; i < lines.length; i++) {
+        const vals = parseCsvLine(lines[i]);
+        const row = {};
+        headers.forEach((h, j) => row[h.trim()] = (vals[j] || '').trim());
+        if (row.Email) contacts.push(row);
+      }
+
+      if (!contacts.length) { showToast('No valid contacts', 'error'); input.value = ''; return; }
+
+      const r = await fetch('/api/upload-contacts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contacts })
+      });
+      const result = await r.json();
+      if (result.success) {
+        showToast(`Added ${result.added} new, skipped ${result.skipped} (duplicates/invalid)`, 'success');
+        await Promise.all([loadStats(), loadContacts()]);
+      } else showToast(result.error, 'error');
+    } catch (err) {
+      showToast('Error: ' + err.message, 'error');
+    }
+    input.value = '';
+  }
+
+  function parseCsvLine(line) {
+    const result = [];
+    let cur = '';
+    let inQuote = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === '"') {
+        if (inQuote && line[i + 1] === '"') { cur += '"'; i++; }
+        else inQuote = !inQuote;
+      } else if (ch === ',' && !inQuote) {
+        result.push(cur);
+        cur = '';
+      } else cur += ch;
+    }
+    result.push(cur);
+    return result;
+  }
+
+  // ── Helpers ──────────────────────────────────────────────────
   function statusBadge(status) {
     const s = (status || 'pending').toLowerCase();
     const map = {
@@ -872,7 +1185,7 @@
       unsubscribed: ['badge-unsub', 'Unsubscribed']
     };
     const [cls, label] = map[s] || ['badge-pending', status || 'Unknown'];
-    return '<span class="badge ' + cls + '">' + label + '</span>';
+    return `<span class="badge ${cls}">${label}</span>`;
   }
 
   function esc(str) {
@@ -881,7 +1194,8 @@
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 
   function formatDate(iso) {
@@ -894,58 +1208,15 @@
     const t = document.getElementById('toast');
     t.textContent = msg;
     t.className = 'toast ' + (type || 'success') + ' show';
-    setTimeout(function() { t.className = 'toast'; }, 4000);
+    setTimeout(() => { t.className = 'toast'; }, 4000);
   }
 
-  // ── CSV Upload ────────────────────────────────────────────────
-  async function handleUpload(input) {
-    const file = input.files[0];
-    if (!file) return;
-
-    try {
-      const text = await file.text();
-      let contacts = [];
-
-      if (file.name.endsWith('.csv')) {
-        const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
-        if (lines.length < 2) return showToast('CSV is empty', 'error');
-        const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
-        for (let i = 1; i < lines.length; i++) {
-          const vals = lines[i].split(',').map(v => v.trim().replace(/^"|"$/g, ''));
-          const row = {};
-          headers.forEach((h, j) => row[h] = vals[j] || '');
-          if (row.Email) contacts.push(row);
-        }
-      } else {
-        showToast('Please use CSV format (Name,Email,Company,Role/Title,Industry,Notes)', 'error');
-        input.value = '';
-        return;
-      }
-
-      if (!contacts.length) {
-        showToast('No valid contacts found', 'error');
-        input.value = '';
-        return;
-      }
-
-      const r = await fetch('/api/upload-contacts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contacts })
-      });
-      const result = await r.json();
-
-      if (result.success) {
-        showToast('Added ' + result.added + ' new contacts (' + result.total + ' total)', 'success');
-        await Promise.all([loadStats(), loadContacts()]);
-      } else {
-        showToast(result.error || 'Upload failed', 'error');
-      }
-    } catch (err) {
-      showToast('Error: ' + err.message, 'error');
-    }
-    input.value = '';
-  }
+  // Close modals on backdrop click
+  document.querySelectorAll('.modal-backdrop').forEach(m => {
+    m.addEventListener('click', (e) => {
+      if (e.target === m) m.classList.remove('show');
+    });
+  });
 
   init();
 </script>

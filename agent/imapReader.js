@@ -1,10 +1,43 @@
 const { ImapFlow } = require('imapflow');
 const { simpleParser } = require('mailparser');
 
+const OOF_SUBJECT_RE = /^(re:\s*)?(out\s*of\s*office|auto[- ]?reply|automatic reply|vacation|away|i[' ]?m\s*(away|ooo|out))/i;
+const UNSUB_SUBJECT_RE = /unsubscribe|opt[- ]?out|remove\s*me/i;
+
+function detectAutoReply(parsed, envelope) {
+  // Check headers (case-insensitive via mailparser's headers Map)
+  const headers = parsed.headers || new Map();
+  const get = (k) => {
+    const v = headers.get(k.toLowerCase());
+    return v ? String(v).toLowerCase() : '';
+  };
+
+  const autoSubmitted = get('auto-submitted');
+  if (autoSubmitted && autoSubmitted !== 'no') return true;
+
+  if (get('x-autoreply') || get('x-autorespond') || get('x-auto-response-suppress')) return true;
+
+  const precedence = get('precedence');
+  if (['auto_reply', 'bulk', 'junk', 'list'].includes(precedence)) return true;
+
+  const subject = parsed.subject || envelope?.subject || '';
+  if (OOF_SUBJECT_RE.test(subject)) return true;
+
+  return false;
+}
+
+function detectUnsubscribe(parsed, envelope) {
+  const subject = parsed.subject || envelope?.subject || '';
+  if (UNSUB_SUBJECT_RE.test(subject)) return true;
+  const text = (parsed.text || '').slice(0, 500).toLowerCase();
+  if (/^\s*unsubscribe\s*$/m.test(text) || /please\s*(unsubscribe|remove\s*me)/i.test(text)) return true;
+  return false;
+}
+
 async function checkForReplies(contacts) {
   if (!contacts || contacts.length === 0) return [];
 
-  const knownEmails = contacts.map(c => c.Email.toLowerCase());
+  const knownEmails = contacts.map(c => c.Email.toLowerCase().trim());
   const replies = [];
 
   const client = new ImapFlow({
@@ -15,14 +48,13 @@ async function checkForReplies(contacts) {
       user: process.env.IMAP_USER,
       pass: process.env.IMAP_PASS
     },
-    logger: false // suppress verbose imap logs
+    logger: false
   });
 
   try {
     await client.connect();
     await client.mailboxOpen('INBOX');
 
-    // Look back 14 days to catch any replies we may have missed
     const since = new Date();
     since.setDate(since.getDate() - 14);
 
@@ -30,7 +62,6 @@ async function checkForReplies(contacts) {
     try {
       uids = await client.search({ seen: false, since });
     } catch {
-      // Some servers don't support combined search — fall back
       uids = await client.search({ seen: false });
     }
 
@@ -52,29 +83,33 @@ async function checkForReplies(contacts) {
         if (fromEmail && knownEmails.includes(fromEmail)) {
           const parsed = await simpleParser(msg.source);
 
-          // Get clean text — prefer plain text over HTML
           let text = parsed.text || '';
           if (!text && parsed.html) {
-            // Strip HTML tags as fallback
             text = parsed.html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
           }
+
+          const isAutoReply = detectAutoReply(parsed, msg.envelope);
+          const isUnsubscribe = detectUnsubscribe(parsed, msg.envelope);
 
           replies.push({
             uid: msg.uid,
             from: fromEmail,
             subject: parsed.subject || '(no subject)',
-            text: text.slice(0, 2000), // cap at 2000 chars
-            date: parsed.date || new Date()
+            text: text.slice(0, 2000),
+            date: parsed.date || new Date(),
+            isAutoReply,
+            isUnsubscribe
           });
 
-          // Mark as seen so we don't process it again tomorrow
+          // Mark as seen regardless — we've processed it
           await client.messageFlagsAdd(
             { uid: msg.uid },
             ['\\Seen'],
             { uid: true }
           );
 
-          console.log(`[IMAP] ✓ Found reply from ${fromEmail}`);
+          const tag = isAutoReply ? '[AUTO]' : isUnsubscribe ? '[UNSUB]' : '';
+          console.log(`[IMAP] ✓ ${tag} Reply from ${fromEmail}`);
         }
       } catch (parseErr) {
         console.error('[IMAP] Error parsing message:', parseErr.message);
@@ -85,6 +120,7 @@ async function checkForReplies(contacts) {
   } catch (err) {
     console.error('[IMAP] Error:', err.message);
     try { await client.logout(); } catch {}
+    throw err; // let caller handle — alerter can notify
   }
 
   return replies;

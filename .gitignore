@@ -2,5 +2,10 @@ node_modules/
 .env
 data/contacts.xlsx
 data/email_state.json
+data/agent.db
+data/agent.db-journal
+data/agent.db-wal
+data/agent.db-shm
+data/*.backup-*
 *.log
 .DS_Store
