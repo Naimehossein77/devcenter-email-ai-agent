@@ -186,19 +186,20 @@ async function triggerInboxCheck() {
 // ─── Cron Schedules ──────────────────────────────────────────────
 
 // Daily outreach + follow-ups + ghost marking
-const cronSchedule = process.env.CRON_SCHEDULE || '0 9 * * *';
+const cronSchedule = process.env.CRON_SCHEDULE || '0 18 * * *';
+const cronTimezone = process.env.CRON_TIMEZONE || 'Asia/Dhaka';
 
 if (cron.validate(cronSchedule)) {
-  cron.schedule(cronSchedule, () => triggerRun('cron'));
-  console.log(`[Server] Outreach cron: "${cronSchedule}" (daily)`);
+  cron.schedule(cronSchedule, () => triggerRun('cron'), { timezone: cronTimezone });
+  console.log(`[Server] Outreach cron: "${cronSchedule}" (${cronTimezone})`);
 } else {
-  console.warn(`[Server] Invalid CRON_SCHEDULE: "${cronSchedule}" — using default 9am daily`);
-  cron.schedule('0 9 * * *', () => triggerRun('cron'));
+  console.warn(`[Server] Invalid CRON_SCHEDULE: "${cronSchedule}" — using default 6pm daily`);
+  cron.schedule('0 18 * * *', () => triggerRun('cron'), { timezone: cronTimezone });
 }
 
 // Hourly inbox check for replies
-cron.schedule('0 * * * *', () => triggerInboxCheck());
-console.log('[Server] Inbox check cron: "0 * * * *" (every hour)');
+cron.schedule('0 * * * *', () => triggerInboxCheck(), { timezone: cronTimezone });
+console.log(`[Server] Inbox check cron: "0 * * * *" (${cronTimezone})`);
 
 // ─── Start ────────────────────────────────────────────────────────
 
