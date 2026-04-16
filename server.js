@@ -307,13 +307,22 @@ console.log(`[Server] Bounce cron: "*/30 * * * *" (${cronTimezone})`);
 // ─── Start ────────────────────────────────────────────────────────
 
 app.listen(PORT, HOST, () => {
+  const os = require('os');
+  const nets = os.networkInterfaces();
+  let lanIp = 'unknown';
+  for (const iface of Object.values(nets)) {
+    for (const cfg of iface) {
+      if (cfg.family === 'IPv4' && !cfg.internal) { lanIp = cfg.address; break; }
+    }
+    if (lanIp !== 'unknown') break;
+  }
+
   console.log(`\n╔════════════════════════════════════════════════╗`);
   console.log(`║   DevCenter Email Agent — Running              ║`);
   console.log(`║   Local:     http://localhost:${PORT}`);
-  console.log(`║   LAN:       http://<your-lan-ip>:${PORT}`);
-  console.log(`║   Host:      ${HOST}`);
+  console.log(`║   LAN:       http://${lanIp}:${PORT}`);
   console.log(`║   Outreach:  ${cronSchedule} (${cronTimezone})`);
-  console.log(`║   Inbox:     hourly`);
+  console.log(`║   Inbox:     every hour`);
   console.log(`║   Bounces:   every 30 min`);
   console.log(`╚════════════════════════════════════════════════╝\n`);
 });
