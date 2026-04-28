@@ -15,20 +15,18 @@ const HOST = process.env.HOST || '0.0.0.0';
 app.use(express.json({ limit: '5mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ─── Shared Mutex ────────────────────────────────────────────────
-// Single lock for all writing operations (outreach + inbox check + bounce check)
-let runLock = false;
-let runLabel = null;
+// ─── Locks ───────────────────────────────────────────────────────
+// Outreach and inbox run independently — inbox is highest priority.
+// Bounce check blocked only if inbox is running.
 let lastRunResult = null;
 
-async function withLock(label, fn) {
-  if (runLock) {
-    console.log(`[Server] ${label} blocked — ${runLabel} running`);
-    return { success: false, error: `${runLabel} already running — please wait` };
+async function withLock(label, lockObj, fn) {
+  if (lockObj.running) {
+    console.log(`[Server] ${label} blocked — already running`);
+    return { success: false, blocked: true, error: `${label} already running` };
   }
-  runLock = true;
-  runLabel = label;
-  console.log(`[Server] Lock acquired: ${label}`);
+  lockObj.running = true;
+  console.log(`[Server] Started: ${label}`);
   try {
     const result = await fn();
     return { success: true, result };
@@ -36,10 +34,17 @@ async function withLock(label, fn) {
     console.error(`[Server] ${label} error:`, err.message);
     return { success: false, error: err.message };
   } finally {
-    runLock = false;
-    runLabel = null;
-    console.log(`[Server] Lock released: ${label}`);
+    lockObj.running = false;
+    console.log(`[Server] Done: ${label}`);
   }
+}
+
+// Expose combined running state for /api/status (lock objects defined below in triggerRun)
+function isRunning() { return (outreachLock && outreachLock.running) || (inboxLock && inboxLock.running); }
+function runLabel() {
+  if (outreachLock && outreachLock.running) return 'outreach';
+  if (inboxLock && inboxLock.running) return 'inbox';
+  return null;
 }
 
 // ─── API: Read ────────────────────────────────────────────────────
@@ -101,8 +106,8 @@ app.get('/api/run-history', (req, res) => {
 app.get('/api/status', (req, res) => {
   res.json({
     success: true,
-    isRunning: runLock,
-    runLabel,
+    isRunning: isRunning(),
+    runLabel: runLabel(),
     lastRunResult,
     schedule: process.env.CRON_SCHEDULE || '0 18 * * *',
     timezone: process.env.CRON_TIMEZONE || 'Asia/Dhaka',
@@ -245,13 +250,31 @@ app.post('/api/run-inbox', async (req, res) => {
 
 // ─── Agent Runner ─────────────────────────────────────────────────
 
+const outreachLock = { running: false };
+const inboxLock    = { running: false };
+const bounceLock   = { running: false };
+
 async function triggerRun(trigger = 'cron', kind = 'full') {
   const label = `${kind}:${trigger}`;
-  const { result, error, success } = await withLock(label, async () => {
+
+  // Pick the right lock — inbox always independent from outreach
+  const lock = (kind === 'inbox') ? inboxLock : outreachLock;
+
+  const { result, error, success, blocked } = await withLock(label, lock, async () => {
     if (kind === 'inbox') return await emailAgent.checkInbox();
     if (kind === 'outreach') return await emailAgent.runOutreach();
-    return await emailAgent.run();
+    // full run: inbox first (priority), then outreach
+    const inbox = await emailAgent.checkInbox();
+    const outreach = await emailAgent.runOutreach();
+    return {
+      ...outreach,
+      repliesHandled: inbox.repliesHandled,
+      errors: [...(inbox.errors || []), ...(outreach.errors || [])],
+      summary: `Outreach: ${outreach.outreachSent} | Follow-ups: ${outreach.followUpsSent} | Replies: ${inbox.repliesHandled} | Ghosted: ${outreach.ghostsMarked} | Errors: ${(inbox.errors || []).length + (outreach.errors || []).length}`
+    };
   });
+
+  if (blocked) return;
 
   if (success && result) {
     lastRunResult = { ...result, trigger, success: result.success !== false };
@@ -271,8 +294,8 @@ async function triggerRun(trigger = 'cron', kind = 'full') {
 }
 
 async function triggerBounceCheck() {
-  if (runLock) return;
-  await withLock('bounce-check', async () => {
+  if (inboxRunning) return; // don't run bounce check while inbox is active
+  await withLock('bounce-check', bounceLock, async () => {
     try {
       return await bounceChecker.checkBounces();
     } catch (err) {
